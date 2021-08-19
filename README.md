@@ -206,6 +206,8 @@ You can use this to:
 
 etc
 
+Note there is a known bug which means all `Bean`s you create to customize the config need to be annotated with `@Primary`
+
 ## Other Notes
 
 If you need to specify extra `TestExecutionListeners`, make sure you include `DependencyInjectionTestExecutionListener` & `DatabaseSetupAndTeardownTestExecutionListener`
