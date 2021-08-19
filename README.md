@@ -197,6 +197,10 @@ You can use this to:
 
 etc
 
+## Other Notes
+
+If you need to specify extra `TestExecutionListeners`, make sure you include `DependencyInjectionTestExecutionListener` & `DatabaseSetupAndTeardownTestExecutionListener`
+
 ## Contributing
 
 All contributions are much appreciated. 

@@ -17,9 +17,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
             .find(DatabaseSetup::class)
             ?.let { annotation ->
                 val dbUnit = ctx.dbUnit()
-                annotation.files.forEach { file ->
-                    dbUnit.givenDataSet(ctx.testClass, file)
-                }
+                dbUnit.givenDataSet(ctx.testClass, annotation.files)
             }
     }
 
@@ -28,9 +26,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
             .find(DatabaseTeardown::class)
             ?.let { annotation ->
                 val dbUnit = ctx.dbUnit()
-                annotation.files.forEach { file ->
-                    dbUnit.givenDataSet(ctx.testClass, file)
-                }
+                dbUnit.givenDataSet(ctx.testClass, annotation.files)
             }
     }
 

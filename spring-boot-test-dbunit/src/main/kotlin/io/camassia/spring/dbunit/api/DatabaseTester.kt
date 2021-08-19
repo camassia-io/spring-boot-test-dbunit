@@ -6,6 +6,7 @@ import org.dbunit.IDatabaseTester
 import org.dbunit.IOperationListener
 import org.dbunit.database.DatabaseConfig
 import org.dbunit.database.IDatabaseConnection
+import org.dbunit.dataset.CompositeDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
 import org.dbunit.operation.DatabaseOperation
@@ -51,13 +52,20 @@ open class DatabaseTester(
      */
     @Suppress("UsePropertyAccessSyntax")
     fun givenDataSet(clazz: Class<*>, filePath1: String, vararg filePaths: String) {
-        val files = arrayOf(filePath1) + filePaths
-        files.forEach { file ->
-            val dataSet = dataSetLoader.loadDataSet(clazz, file)
-            setSetUpOperation(DatabaseOperation.CLEAN_INSERT)
-            setDataSet(dataSet)
-            onSetup()
+        givenDataSet(clazz, arrayOf(filePath1) + filePaths)
+    }
+
+    internal fun givenDataSet(clazz: Class<*>, filePaths: Array<out String>) {
+        val dataSet = filePaths.map { file ->
+            dataSetLoader.loadDataSet(clazz, file) ?: throw AssertionError("Dataset [$file] not found")
+        }.let {
+            if(it.size == 1) it.first()
+            else CompositeDataSet(it.toTypedArray())
         }
+
+        setSetUpOperation(DatabaseOperation.CLEAN_INSERT)
+        setDataSet(dataSet)
+        onSetup()
     }
 
     /**
