@@ -29,6 +29,10 @@ For some demo examples see the spring-boot-test-dbunit-demo project
 The following standalone example uses an In Memory H2 Database with Springs JdbcTemplate as the test subject.
 
 #### Using `DatabaseSetup` / `DatabaseTeardown` annotations
+
+These by default will load XML files you specify using the default DataSetLoader.
+The file types, & loader can be configured using Beans. See Customization below for more info.
+
 ```kotlin
 @SpringBootTest(
   classes = [
@@ -73,11 +77,14 @@ class SomeTestClass @Autowired constructor(
     class DemoTestConfiguration {
 
         /*
-        This example uses an in memory H2 Database.
-        If your DataSource is already available via component scanning then this is not necessary.
-        The Spring-boot-test-dbunit library requires a DataSource bean to be registered at a minimum.
-        If you would prefer to use an alternative connection type than a DataSource, see the Customization options below.
+        This is the minimum connection config you need to provide to get Db Unit working
          */
+        @Bean
+        fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
+
+        /*
+        This example uses an in memory H2 Database.
+        */
         @Bean
         fun dataSource(): DataSource = DataSourceBuilder
             .create()
@@ -153,11 +160,14 @@ class SomeTestClass @Autowired constructor(
     class DemoTestConfiguration {
 
         /*
-        This example uses an in memory H2 Database.
-        If your DataSource is already available via component scanning then this is not necessary.
-        The Spring-boot-test-dbunit library requires a DataSource bean to be registered at a minimum.
-        If you would prefer to use an alternative connection type than a DataSource, see the Customization options below.
+        This is the minimum connection config you need to provide to get Db Unit working
          */
+        @Bean
+        fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
+
+        /*
+        This example uses an in memory H2 Database.
+        */
         @Bean
         fun dataSource(): DataSource = DataSourceBuilder
             .create()
@@ -193,7 +203,6 @@ You can use this to:
 - Add DatabaseConfig
 - Change the DataSetLoader from the default XmlLocalResourceDataSetLoader
 - Modify the Database Connection DBUnit uses
-- Modify `ConnectionSupplier` if for example you are not using a `DataSource` or wish to configure which `DataSource` is used
 
 etc
 

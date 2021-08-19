@@ -3,6 +3,7 @@ package io.camassia.spring.dbunit
 import io.camassia.spring.dbunit.api.DatabaseSetup
 import io.camassia.spring.dbunit.api.DatabaseTeardown
 import io.camassia.spring.dbunit.api.DatabaseTester
+import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.dataset.xml.XmlLocalResourceDataSetLoader
 import org.assertj.core.api.Assertions.assertThat
 import org.dbunit.dataset.IDataSet
@@ -68,6 +69,9 @@ class DemoUsingAnnotationsWithCustomDataSetLoader @Autowired constructor(
 
         @Bean
         fun jdbc(ds: DataSource) = JdbcTemplate(ds)
+
+        @Bean
+        fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
 
         @Bean
         fun dataSetLoader() = object : XmlLocalResourceDataSetLoader() {

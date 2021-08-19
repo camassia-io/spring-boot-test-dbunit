@@ -1,6 +1,7 @@
 package io.camassia.spring.dbunit
 
 import io.camassia.spring.dbunit.api.DatabaseTester
+import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -70,5 +71,8 @@ class DemoUsingDatabaseTester @Autowired constructor(
 
         @Bean
         fun jdbc(ds: DataSource) = JdbcTemplate(ds)
+
+        @Bean
+        fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
     }
 }
