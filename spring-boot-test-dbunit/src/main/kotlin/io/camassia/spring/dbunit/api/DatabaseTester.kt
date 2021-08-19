@@ -2,8 +2,8 @@ package io.camassia.spring.dbunit.api
 
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
+import org.dbunit.AbstractDatabaseTester
 import org.dbunit.IDatabaseTester
-import org.dbunit.IOperationListener
 import org.dbunit.database.DatabaseConfig
 import org.dbunit.database.IDatabaseConnection
 import org.dbunit.dataset.CompositeDataSet
@@ -19,16 +19,10 @@ open class DatabaseTester(
     private val underlying: IDatabaseTester,
     private val config: DatabaseConfig,
     private val connectionModifier: ConnectionModifier,
-    private val dataSetLoader: DataSetLoader
-    ) : IDatabaseTester {
+    private val dataSetLoader: DataSetLoader,
+    schema: String? = null
+) : AbstractDatabaseTester(schema) {
 
-    /**
-     * Retrieves a DB Unit Connection
-     * Remember to call close() on the connection instance once you are done to free that connection up
-     */
-    override fun getConnection(): IDatabaseConnection = underlying.connection
-        .also { it.apply(config) }
-        .also { connectionModifier.modify(it) }
     /**
      * Safe way of using a connection & then freeing it back up again after your work is done
      */
@@ -59,7 +53,7 @@ open class DatabaseTester(
         val dataSet = filePaths.map { file ->
             dataSetLoader.loadDataSet(clazz, file) ?: throw AssertionError("Dataset [$file] not found")
         }.let {
-            if(it.size == 1) it.first()
+            if (it.size == 1) it.first()
             else CompositeDataSet(it.toTypedArray())
         }
 
@@ -99,26 +93,12 @@ open class DatabaseTester(
 
     /* ------------------------------------- Delegate Methods ------------------------------------------ */
 
-    override fun closeConnection(connection: IDatabaseConnection?) = underlying.closeConnection(connection)
-
-    override fun getDataSet(): IDataSet = underlying.getDataSet()
-
-    override fun getSetUpOperation(): DatabaseOperation = underlying.getSetUpOperation()
-
-    override fun getTearDownOperation(): DatabaseOperation = underlying.getTearDownOperation()
-
-    override fun setDataSet(dataSet: IDataSet?) = underlying.setDataSet(dataSet)
-
-    override fun setSchema(schema: String?) = underlying.setSchema(schema)
-
-    override fun setSetUpOperation(setUpOperation: DatabaseOperation?) = underlying.setSetUpOperation(setUpOperation)
-
-    override fun setTearDownOperation(tearDownOperation: DatabaseOperation?) = underlying.setTearDownOperation(tearDownOperation)
-
-    override fun onSetup() = underlying.onSetup()
-
-    override fun onTearDown() = underlying.onTearDown()
-
-    override fun setOperationListener(operationListener: IOperationListener?) = underlying.setOperationListener(operationListener)
+    /**
+     * Retrieves a DB Unit Connection
+     * Remember to call close() on the connection instance once you are done to free that connection up
+     */
+    override fun getConnection(): IDatabaseConnection = underlying.connection
+        .also { it.apply(config) }
+        .also { connectionModifier.modify(it) }
 
 }
