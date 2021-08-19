@@ -211,4 +211,4 @@ If you'd like to help out, please either:
 
 or
   
-- Fork the project and create a PR to the master branch
+- Fork the project and create a PR to the main branch
