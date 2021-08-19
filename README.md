@@ -1,5 +1,9 @@
 # Spring Boot Test DBUnit
 
+[![Build](https://github.com/camassia-io/spring-boot-test-dbunit/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/camassia-io/spring-boot-test-dbunit/actions/workflows/build.yml)
+
+[![Publish](https://github.com/camassia-io/spring-boot-test-dbunit/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/camassia-io/spring-boot-test-dbunit/actions/workflows/release.yml)
+
 An Open Source Spring Boot DB Unit Integration, based on the popular but no longer maintained [Spring Test Db Unit](https://springtestdbunit.github.io/spring-test-dbunit)
 
 This is a Kotlin project, but should be easily integrated with Java.
