@@ -4,7 +4,6 @@ import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
 import io.camassia.spring.dbunit.api.dataset.xml.XmlLocalResourceDataSetLoader
-import org.dbunit.DataSourceDatabaseTester
 import org.dbunit.database.DatabaseConfig
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.test.context.TestConfiguration
@@ -36,7 +35,7 @@ class SpringBootTestDbUnitConfiguration {
         connectionModifier: ConnectionModifier,
         dataSetLoader: DataSetLoader
     ): DatabaseTester = DatabaseTester(
-        DataSourceDatabaseTester(ds),
+        { ds.connection },
         config,
         connectionModifier,
         dataSetLoader

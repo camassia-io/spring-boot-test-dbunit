@@ -1,10 +1,11 @@
 package io.camassia.spring.dbunit.api
 
+import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
 import org.dbunit.AbstractDatabaseTester
-import org.dbunit.IDatabaseTester
 import org.dbunit.database.DatabaseConfig
+import org.dbunit.database.DatabaseConnection
 import org.dbunit.database.IDatabaseConnection
 import org.dbunit.dataset.CompositeDataSet
 import org.dbunit.dataset.IDataSet
@@ -16,7 +17,7 @@ import kotlin.reflect.KClass
  * Acts as a Wrapper around DbUnits IDatabaseTester + adds extra utility methods
  */
 open class DatabaseTester(
-    private val underlying: IDatabaseTester,
+    private val connectionSupplier: ConnectionSupplier,
     private val config: DatabaseConfig,
     private val connectionModifier: ConnectionModifier,
     private val dataSetLoader: DataSetLoader,
@@ -45,9 +46,7 @@ open class DatabaseTester(
      * Loads DataSets from Local Resources
      */
     @Suppress("UsePropertyAccessSyntax")
-    fun givenDataSet(clazz: Class<*>, filePath1: String, vararg filePaths: String) {
-        givenDataSet(clazz, arrayOf(filePath1) + filePaths)
-    }
+    fun givenDataSet(clazz: Class<*>, filePath1: String, vararg filePaths: String) = givenDataSet(clazz, arrayOf(filePath1) + filePaths)
 
     internal fun givenDataSet(clazz: Class<*>, filePaths: Array<out String>) {
         val dataSet = filePaths.map { file ->
@@ -97,7 +96,8 @@ open class DatabaseTester(
      * Retrieves a DB Unit Connection
      * Remember to call close() on the connection instance once you are done to free that connection up
      */
-    override fun getConnection(): IDatabaseConnection = underlying.connection
+    override fun getConnection(): IDatabaseConnection = connectionSupplier.getConnection()
+        .let { DatabaseConnection(it) }
         .also { it.apply(config) }
         .also { connectionModifier.modify(it) }
 

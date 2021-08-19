@@ -193,7 +193,7 @@ You can use this to:
 - Add DatabaseConfig
 - Change the DataSetLoader from the default XmlLocalResourceDataSetLoader
 - Modify the Database Connection DBUnit uses
-- Modify the underlying DBUnit DatabaseTester (e.g. to use an alternative to a DataSource)
+- Modify `ConnectionSupplier` if for example you are not using a `DataSource` or wish to configure which `DataSource` is used
 
 etc
 
