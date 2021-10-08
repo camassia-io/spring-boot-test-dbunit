@@ -1,8 +1,8 @@
 package io.camassia.spring.dbunit
 
-import io.camassia.spring.dbunit.api.DatabaseSetup
-import io.camassia.spring.dbunit.api.DatabaseTeardown
 import io.camassia.spring.dbunit.api.DatabaseTester
+import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
+import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach

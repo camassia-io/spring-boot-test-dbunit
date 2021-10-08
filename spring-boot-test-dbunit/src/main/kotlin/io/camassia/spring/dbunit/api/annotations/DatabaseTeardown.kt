@@ -1,7 +1,7 @@
-package io.camassia.spring.dbunit.api
+package io.camassia.spring.dbunit.api.annotations
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-annotation class DatabaseSetup(
+annotation class DatabaseTeardown(
     vararg val files: String
 )

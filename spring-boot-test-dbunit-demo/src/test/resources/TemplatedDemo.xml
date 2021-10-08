@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <!--
+    Note, In this example, to make it clear which fields are templated and need to be overridden square brackets have been used.
+    This is completely optional, you could use no symbols, or any other symbols you like.
+    Whatever symbols/indicators you use, you just need to do the same when referencing in overrides.
+    -->
+    <demo id="[ID]" name="[NAME]"/>
+</dataset>

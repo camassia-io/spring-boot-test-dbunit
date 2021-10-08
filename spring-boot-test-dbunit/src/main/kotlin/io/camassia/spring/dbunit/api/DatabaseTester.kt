@@ -2,7 +2,9 @@ package io.camassia.spring.dbunit.api
 
 import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
+import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
+import io.camassia.spring.dbunit.api.dataset.File
 import org.dbunit.AbstractDatabaseTester
 import org.dbunit.database.DatabaseConfig
 import org.dbunit.database.DatabaseConnection
@@ -10,6 +12,7 @@ import org.dbunit.database.IDatabaseConnection
 import org.dbunit.dataset.CompositeDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
+import org.dbunit.dataset.ReplacementDataSet
 import org.dbunit.operation.DatabaseOperation
 import kotlin.reflect.KClass
 
@@ -21,8 +24,11 @@ open class DatabaseTester(
     private val config: DatabaseConfig,
     private val connectionModifier: ConnectionModifier,
     private val dataSetLoader: DataSetLoader,
-    schema: String? = null
+    schema: String? = null,
+    defaults: List<TableDefaults> = emptyList()
 ) : AbstractDatabaseTester(schema) {
+
+    private val defaults = defaults.associateBy { it.table }
 
     /**
      * Safe way of using a connection & then freeing it back up again after your work is done
@@ -40,17 +46,38 @@ open class DatabaseTester(
     /**
      * Loads DataSets from Local Resources
      */
-    fun givenDataSet(clazz: KClass<*>, filePath1: String, vararg filePaths: String) = givenDataSet(clazz.java, filePath1, *filePaths)
-
+    fun givenDataSet(clazz: KClass<*>, filePath1: String, vararg filePaths: String) = givenDataSet(clazz.java, (arrayOf(filePath1) + filePaths).map { File(it) }.toTypedArray())
     /**
      * Loads DataSets from Local Resources
      */
-    @Suppress("UsePropertyAccessSyntax")
-    fun givenDataSet(clazz: Class<*>, filePath1: String, vararg filePaths: String) = givenDataSet(clazz, arrayOf(filePath1) + filePaths)
+    fun givenDataSet(clazz: Class<*>, filePath1: String, vararg filePaths: String) = givenDataSet(clazz, (arrayOf(filePath1) + filePaths).map { File(it) }.toTypedArray())
+    /**
+     * Loads DataSets from Local Resources
+     */
+    fun givenDataSet(clazz: KClass<*>, file1: File, vararg files: File) = givenDataSet(clazz.java, arrayOf(file1) + files)
+    /**
+     * Loads DataSets from Local Resources
+     */
+    fun givenDataSet(clazz: Class<*>, file1: File, vararg files: File) = givenDataSet(clazz, arrayOf(file1) + files)
 
-    internal fun givenDataSet(clazz: Class<*>, filePaths: Array<out String>) {
-        val dataSet = filePaths.map { file ->
-            dataSetLoader.loadDataSet(clazz, file) ?: throw AssertionError("Dataset [$file] not found")
+    @Suppress("UsePropertyAccessSyntax")
+    internal fun givenDataSet(
+        clazz: Class<*>,
+        files: Array<out File>
+    ) {
+        val dataSet: IDataSet = files.map { file ->
+            val underlying = dataSetLoader.loadDataSet(clazz, file.path) ?: throw AssertionError("Dataset [${file.path}] not found")
+            if (defaults.isNotEmpty() || file.overrides.isNotEmpty()) {
+                ReplacementDataSet(underlying).also { ds ->
+                    val datasetTables = underlying.tableNames.map { it.toLowerCase() }.toSet()
+                    val defaultOverrides: Set<File.CellOverride> = defaults.filterKeys { datasetTables.contains(it.toLowerCase()) }.values.map { it.overrides }.flatten().toSet()
+                    val testOverrides: Set<File.CellOverride> = file.overrides
+
+                    (defaultOverrides + testOverrides).forEach { (key, value) ->
+                        ds.addReplacementObject(key, value)
+                    }
+                }
+            } else underlying
         }.let {
             if (it.size == 1) it.first()
             else CompositeDataSet(it.toTypedArray())
@@ -96,8 +123,7 @@ open class DatabaseTester(
      * Retrieves a DB Unit Connection
      * Remember to call close() on the connection instance once you are done to free that connection up
      */
-    override fun getConnection(): IDatabaseConnection = connectionSupplier.getConnection()
-        .let { DatabaseConnection(it) }
+    override fun getConnection(): IDatabaseConnection = DatabaseConnection(connectionSupplier.getConnection())
         .also { it.apply(config) }
         .also { connectionModifier.modify(it) }
 

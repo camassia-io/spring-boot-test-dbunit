@@ -3,6 +3,7 @@ package io.camassia.spring.dbunit
 import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
+import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
 import io.camassia.spring.dbunit.api.dataset.xml.XmlLocalResourceDataSetLoader
 import org.dbunit.database.DatabaseConfig
@@ -33,12 +34,15 @@ class SpringBootTestDbUnitConfiguration {
         connectionSupplier: DataSourceConnectionSupplier,
         config: DatabaseConfig,
         connectionModifier: ConnectionModifier,
-        dataSetLoader: DataSetLoader
+        dataSetLoader: DataSetLoader,
+        defaults: List<TableDefaults>
     ): DatabaseTester = DatabaseTester(
         connectionSupplier,
         config,
         connectionModifier,
-        dataSetLoader
+        dataSetLoader,
+        null,
+        defaults
     )
 
 }

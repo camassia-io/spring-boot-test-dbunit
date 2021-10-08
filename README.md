@@ -6,11 +6,36 @@
 
 An Open Source Spring Boot DB Unit Integration, based on the popular but no longer maintained [Spring Test Db Unit](https://springtestdbunit.github.io/spring-test-dbunit)
 
-This is a Kotlin project, but should be easily integrated with Java.
+This library is written in Kotlin, but can be easily integrated into a Java project.
 
 ## Getting Started
 
 For some demo examples see the spring-boot-test-dbunit-demo project
+
+### Register GH Packages as a Source Repository
+
+#### Gradle
+
+```
+repositories {
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/camassia-io/*")
+    }
+}
+```
+
+#### Maven
+
+```
+<repositories>
+    <repository>
+        <id>GitHubPackages</id>
+        <name>GitHubPackages</name>
+        <url>https://maven.pkg.github.com/camassia-io/*</url>
+    </repository>
+</repositories>
+```
 
 ### Import the Dependency
 
@@ -30,7 +55,7 @@ For some demo examples see the spring-boot-test-dbunit-demo project
 
 ### Create a Spring Boot Test
 
-The following standalone example uses an In Memory H2 Database with Springs JdbcTemplate as the test subject.
+The following standalone examples use an In Memory H2 Database with Springs JdbcTemplate as the test subject.
 
 #### Using `DatabaseSetup` / `DatabaseTeardown` annotations
 
@@ -106,6 +131,59 @@ class SomeTestClass @Autowired constructor(
     }
 }
 ```
+
+###### Useful Examples
+
+See:
+- DemoUsingAnnotations
+- DemoUsingAnnotationsWithCustomDataSetLoader
+- DemoUsingTemplatedAnnotations
+- DemoUsingTemplatedAnnotationsAndDefaults
+
+#### Templating
+
+If using Templated files, e.g.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <demo id="[ID]" name="[NAME]"/>
+</dataset>
+```
+
+You can override these templated values using `@TemplatedDatabaseSetup` / `@TemplatedDatabaseTeardown`. 
+
+```kotlin
+@TemplatedDatabaseSetup(
+    File(
+        "/TemplatedDemo.xml", 
+        Override("[ID]", "123"), // Overrides value "[ID]" in TemplatedDemo.xml with 123
+        Override("[NAME]", "[null]") // Overrides value "[ID]" in TemplatedDemo.xml with null
+    )
+)
+```
+
+Note that due to how DbUnits replacement dataset works, you have to reference overrides by the value, not the column name.
+As a result, it's good practice to use brackets, or some other kind of indicator to make it obvious what columns should be overridden, the example above uses square brackets for this purpose.
+
+You can also set up global default overrides, e.g. in case you only one to override 1 or 2 fields per test. 
+You can achieve this by registering one or more beans of type `TableDefaults`
+e.g.
+
+```kotlin
+@Bean
+fun demoDefaults() = TableDefaults("demo", File.CellOverride("[NAME]", "Test"))
+```
+
+The example above overrides all dataset values for `[NAME]` with value `"Test"` unless a further override has been used in a `TemplatedDatabaseSetup` or `TemplatedDatabaseTeardown`, or via `DatabaseTester` directly.
+
+###### Useful Examples
+
+See:
+- DemoUsingTemplatedAnnotations
+- DemoUsingTemplatedAnnotationsAndDefaults
+- DemoUsingTemplatedDatabaseTester
+- DemoUsingTemplatedDatabaseTesterAndDefaults
 
 #### Using `DatabaseTester` instead of annotations
 
@@ -190,6 +268,13 @@ class SomeTestClass @Autowired constructor(
 }
 ```
 
+###### Useful Examples
+
+See:
+- DemoUsingDatabaseTester
+- DemoUsingTemplatedDatabaseTester
+- DemoUsingTemplatedDatabaseTesterAndDefaults
+
 Notes:
 
 - `@SpringBootTest`: Ensures your test is run with the Spring Runner
@@ -211,6 +296,12 @@ You can use this to:
 etc
 
 Note there is a known bug which means all `Bean`s you create to customize the config need to be annotated with `@Primary`
+
+
+###### Useful Examples
+
+See:
+- DemoUsingAnnotationsWithCustomDataSetLoader
 
 ## Other Notes
 

@@ -1,12 +1,10 @@
 package io.camassia.spring.dbunit
 
 import io.camassia.spring.dbunit.api.DatabaseTester
-import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
-import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
-import io.camassia.spring.dbunit.api.dataset.xml.XmlLocalResourceDataSetLoader
+import io.camassia.spring.dbunit.api.customization.TableDefaults
+import io.camassia.spring.dbunit.api.dataset.File
 import org.assertj.core.api.Assertions.assertThat
-import org.dbunit.dataset.IDataSet
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,19 +16,14 @@ import org.springframework.context.annotation.Bean
 import org.springframework.jdbc.core.JdbcTemplate
 import javax.sql.DataSource
 
-/**
- * Lets say all your xml data sets were in a certain directory, and all had file extension .xml
- * You might want to reduce the noise in your tests by getting rid of the preceding / and .xml from DatabaseSetup/DatabaseTeardown annotations
- * You can achieve this easily by creating a custom DataSetLoader Bean.
- */
 @SpringBootTest(
     classes = [
         DemoJdbcRepository::class,
-        DemoUsingAnnotationsWithCustomDataSetLoader.DemoTestConfiguration::class
+        DemoUsingTemplatedDatabaseTesterAndDefaults.DemoTestConfiguration::class
     ]
 )
 @AutoConfigureDbUnit
-class DemoUsingAnnotationsWithCustomDataSetLoader @Autowired constructor(
+class DemoUsingTemplatedDatabaseTesterAndDefaults @Autowired constructor(
     private val dbUnit: DatabaseTester,
     private val repository: DemoJdbcRepository
 ) {
@@ -41,9 +34,12 @@ class DemoUsingAnnotationsWithCustomDataSetLoader @Autowired constructor(
     }
 
     @Test
-    @DatabaseSetup("Demo")
-    @DatabaseTeardown("Empty")
-    fun `repository should query successfully`() {
+    fun `should query repository successfully`() {
+        dbUnit.givenDataSet(
+            DemoUsingTemplatedDatabaseTesterAndDefaults::class.java,
+            File("/TemplatedDemo.xml", File.CellOverride("[ID]", 123))
+        )
+
         val result = repository.selectAll()
         assertThat(result).hasSize(1)
         assertThat(result[0].id).isEqualTo(123)
@@ -74,10 +70,6 @@ class DemoUsingAnnotationsWithCustomDataSetLoader @Autowired constructor(
         fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
 
         @Bean
-        fun dataSetLoader() = object : XmlLocalResourceDataSetLoader() {
-            override fun loadDataSet(clazz: Class<*>, location: String): IDataSet? {
-                return super.loadDataSet(clazz, "/${location}.xml")
-            }
-        }
+        fun demoDefaults() = TableDefaults("demo", File.CellOverride("[NAME]", "Test"))
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class DemoJdbcRepository(private val jdbc: JdbcTemplate) {
 
-    fun createTable() = jdbc.execute("CREATE TABLE demo (id BIGINT NOT NULL, name VARCHAR(50) NOT NULL, CONSTRAINT demo_pk PRIMARY KEY (id))")
+    fun createTable() = jdbc.execute("CREATE TABLE demo (id BIGINT NOT NULL, name VARCHAR(50), CONSTRAINT demo_pk PRIMARY KEY (id))")
 
     fun dropTable() = jdbc.execute("DROP TABLE demo")
 
@@ -23,5 +23,5 @@ class DemoJdbcRepository(private val jdbc: JdbcTemplate) {
         }
     )
 
-    class DemoDao(val id: Long, val name: String)
+    class DemoDao(val id: Long, val name: String?)
 }
