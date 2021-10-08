@@ -6,6 +6,8 @@
 
 An Open Source Spring Boot DB Unit Integration, based on the popular but no longer maintained [Spring Test Db Unit](https://springtestdbunit.github.io/spring-test-dbunit)
 
+This library aims to provide a highly customisable, easy to use way of testing the Repository/Database layer of your Spring Boot services using real, or in memory databases.
+
 This library is written in Kotlin, but can be easily integrated into a Java project.
 
 ## Getting Started
