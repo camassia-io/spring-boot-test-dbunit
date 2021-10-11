@@ -38,6 +38,37 @@ publishing {
             version = System.getenv("GITHUB_VERSION")
             from(components["kotlin"])
             artifact(tasks.kotlinSourcesJar)
+            pom {
+                name.set("spring-boot-test-dbunit")
+                description.set("An Open Source Spring Boot DB Unit Integration, based on the popular but no longer maintained Spring Test DB Unit")
+                url.set("https://github.com/camassia-io/spring-boot-test-dbunit")
+                version = System.getenv("GITHUB_VERSION")
+                groupId = "io.camassia"
+                artifactId = "spring-boot-test-dbunit"
+                packaging = "jar"
+                scm {
+                    connection.set("scm:https://github.com/camassia-io/spring-boot-test-dbunit.git")
+                    developerConnection.set("scm:git://github.com/camassia-io/spring-boot-test-dbunit.git")
+                }
+                licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/LICENSE")
+                        distribution.set("repo")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("ed0906")
+                        name.set("ed0906")
+                        email.set("ed0906@camassia.io")
+                    }
+                }
+                organization {
+                    name.set("Camassia")
+                    url.set("https://camassia.io")
+                }
+            }
         }
     }
 }
