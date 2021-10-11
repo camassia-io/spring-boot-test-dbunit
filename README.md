@@ -23,6 +23,11 @@ repositories {
     maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/camassia-io/*")
+        // Note specifying Credentials is a short term fix until https://github.community/t/download-from-github-package-registry-without-authentication/14407/93 is fixed by GitHub.
+        credentials {
+            username = "public"
+            password = "\u0067hp_MbWuHdR1tjyN9Zk7v1PMIDh2rEm7tj0aBtZ0"
+        }
     }
 }
 ```
@@ -34,7 +39,7 @@ repositories {
     <repository>
         <id>GitHubPackages</id>
         <name>GitHubPackages</name>
-        <url>https://maven.pkg.github.com/camassia-io/*</url>
+        <url>https://public:&#103;hp_MbWuHdR1tjyN9Zk7v1PMIDh2rEm7tj0aBtZ0@maven.pkg.github.com/camassia-io/*</url>
     </repository>
 </repositories>
 ```
