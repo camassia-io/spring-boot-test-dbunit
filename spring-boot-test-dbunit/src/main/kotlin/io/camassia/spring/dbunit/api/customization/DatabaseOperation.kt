@@ -1,4 +1,4 @@
-package io.camassia.spring.dbunit.api.annotations
+package io.camassia.spring.dbunit.api.customization
 
 import org.dbunit.operation.DatabaseOperation as Delegate
 

@@ -1,8 +1,8 @@
 package io.camassia.spring.dbunit.api
 
-import io.camassia.spring.dbunit.api.annotations.DatabaseOperation
 import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
+import io.camassia.spring.dbunit.api.customization.DatabaseOperation
 import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
 import io.camassia.spring.dbunit.api.dataset.File
