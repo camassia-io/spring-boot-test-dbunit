@@ -7,5 +7,8 @@ import org.springframework.test.context.TestExecutionListeners
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.TYPE, AnnotationTarget.CLASS)
 @Import(SpringBootTestDbUnitConfiguration::class)
-@TestExecutionListeners(DatabaseSetupAndTeardownTestExecutionListener::class)
+@TestExecutionListeners(
+    DatabaseSetupAndTeardownTestExecutionListener::class,
+    mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS
+)
 annotation class AutoConfigureDbUnit
