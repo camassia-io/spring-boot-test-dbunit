@@ -23,9 +23,9 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
         val templated = annotations.find(TemplatedDatabaseSetup::class)?.toFiles()
         if(standard != null && templated != null) throw DbUnitException("Cannot use both @DatabaseSetup & @TemplatedDatabaseSetup at the same time")
         (standard ?: templated)
-            ?.let { setups ->
+            ?.let { (setups, operation) ->
                 val dbUnit = ctx.dbUnit()
-                dbUnit.givenDataSet(ctx.testClass, setups)
+                dbUnit.givenDataSet(ctx.testClass, setups, operation)
             }
     }
 
@@ -35,16 +35,16 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
         val templated = annotations.find(TemplatedDatabaseTeardown::class)?.toFiles()
         if(standard != null && templated != null) throw DbUnitException("Cannot use both @DatabaseTeardown & @TemplatedDatabaseTeardown at the same time")
         (standard ?: templated)
-            ?.let { setups ->
+            ?.let { (setups, operation) ->
                 val dbUnit = ctx.dbUnit()
-                dbUnit.givenDataSet(ctx.testClass, setups)
+                dbUnit.givenDataSet(ctx.testClass, setups, operation)
             }
     }
 
-    private fun DatabaseSetup.toFiles() = this.files.map { File(it) }
-    private fun DatabaseTeardown.toFiles() = this.files.map { File(it) }
-    private fun TemplatedDatabaseSetup.toFiles() = this.files.map { it.toFile() }
-    private fun TemplatedDatabaseTeardown.toFiles() = this.files.map { it.toFile() }
+    private fun DatabaseSetup.toFiles() = this.files.map { File(it) } to this.operation
+    private fun DatabaseTeardown.toFiles() = this.files.map { File(it) } to this.operation
+    private fun TemplatedDatabaseSetup.toFiles() = this.files.map { it.toFile() } to this.operation
+    private fun TemplatedDatabaseTeardown.toFiles() = this.files.map { it.toFile() } to this.operation
     private fun FileAnnotation.toFile() = File(
         this.name,
         this.overrides.map { override ->

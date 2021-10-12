@@ -1,5 +1,6 @@
 package io.camassia.spring.dbunit.api
 
+import io.camassia.spring.dbunit.api.annotations.DatabaseOperation
 import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.customization.TableDefaults
@@ -13,7 +14,6 @@ import org.dbunit.dataset.CompositeDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
 import org.dbunit.dataset.ReplacementDataSet
-import org.dbunit.operation.DatabaseOperation
 import kotlin.reflect.KClass
 
 /**
@@ -117,7 +117,7 @@ open class DatabaseTester(
             else CompositeDataSet(it.toTypedArray())
         }
 
-        setSetUpOperation(operation)
+        setSetUpOperation(operation.underlying)
         setDataSet(dataSet)
         onSetup()
     }
