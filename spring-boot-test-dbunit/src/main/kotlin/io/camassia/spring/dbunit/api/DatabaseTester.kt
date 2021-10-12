@@ -49,8 +49,9 @@ open class DatabaseTester(
     fun givenDataSet(
         clazz: KClass<*>,
         filePath1: String,
-        vararg filePaths: String
-    ) = givenDataSet(clazz.java, (arrayOf(filePath1) + filePaths).map { File(it) }.toTypedArray())
+        vararg filePaths: String,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(clazz.java, (listOf(filePath1) + filePaths).map { File(it) }, operation)
 
     /**
      * Loads DataSets using the DataSet Loader
@@ -58,8 +59,9 @@ open class DatabaseTester(
     fun givenDataSet(
         clazz: Class<*>,
         filePath1: String,
-        vararg filePaths: String
-    ) = givenDataSet(clazz, (arrayOf(filePath1) + filePaths).map { File(it) }.toTypedArray())
+        vararg filePaths: String,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(clazz, (listOf(filePath1) + filePaths).map { File(it) }, operation)
 
 
     /**
@@ -68,16 +70,18 @@ open class DatabaseTester(
     fun givenDataSet(
         clazz: KClass<*>,
         file1: File,
-        vararg files: File
-    ) = givenDataSet(clazz.java, arrayOf(file1) + files)
+        vararg files: File,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(clazz.java, listOf(file1) + files, operation)
 
     /**
      * Loads DataSets using the DataSet Loader
      */
     fun givenDataSet(
         clazz: KClass<*>,
-        files: Collection<File>
-    ) = givenDataSet(clazz.java, files.toTypedArray())
+        files: Collection<File>,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(clazz.java, files, operation)
 
     /**
      * Loads DataSets using the DataSet Loader
@@ -85,21 +89,15 @@ open class DatabaseTester(
     fun givenDataSet(
         clazz: Class<*>,
         file1: File,
-        vararg files: File
-    ) = givenDataSet(clazz, arrayOf(file1) + files)
-
-    /**
-     * Loads DataSets using the DataSet Loader
-     */
-    fun givenDataSet(
-        clazz: Class<*>,
-        files: Collection<File>
-    ) = givenDataSet(clazz, files.toTypedArray())
+        vararg files: File,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(clazz, listOf(file1) + files, operation)
 
     @Suppress("UsePropertyAccessSyntax")
-    internal fun givenDataSet(
+    fun givenDataSet(
         clazz: Class<*>,
-        files: Array<out File>
+        files: Collection<File>,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
         val dataSet: IDataSet = files.map { file ->
             val underlying = dataSetLoader.loadDataSet(clazz, file.path) ?: throw AssertionError("Dataset [${file.path}] not found")
@@ -119,7 +117,7 @@ open class DatabaseTester(
             else CompositeDataSet(it.toTypedArray())
         }
 
-        setSetUpOperation(DatabaseOperation.CLEAN_INSERT)
+        setSetUpOperation(operation)
         setDataSet(dataSet)
         onSetup()
     }

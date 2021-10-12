@@ -25,7 +25,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
         (standard ?: templated)
             ?.let { setups ->
                 val dbUnit = ctx.dbUnit()
-                dbUnit.givenDataSet(ctx.testClass, setups.toTypedArray())
+                dbUnit.givenDataSet(ctx.testClass, setups)
             }
     }
 
@@ -37,7 +37,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
         (standard ?: templated)
             ?.let { setups ->
                 val dbUnit = ctx.dbUnit()
-                dbUnit.givenDataSet(ctx.testClass, setups.toTypedArray())
+                dbUnit.givenDataSet(ctx.testClass, setups)
             }
     }
 
