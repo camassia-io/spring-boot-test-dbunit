@@ -44,21 +44,57 @@ open class DatabaseTester(
     }
 
     /**
-     * Loads DataSets from Local Resources
+     * Loads DataSets using the DataSet Loader
      */
-    fun givenDataSet(clazz: KClass<*>, filePath1: String, vararg filePaths: String) = givenDataSet(clazz.java, (arrayOf(filePath1) + filePaths).map { File(it) }.toTypedArray())
+    fun givenDataSet(
+        clazz: KClass<*>,
+        filePath1: String,
+        vararg filePaths: String
+    ) = givenDataSet(clazz.java, (arrayOf(filePath1) + filePaths).map { File(it) }.toTypedArray())
+
     /**
-     * Loads DataSets from Local Resources
+     * Loads DataSets using the DataSet Loader
      */
-    fun givenDataSet(clazz: Class<*>, filePath1: String, vararg filePaths: String) = givenDataSet(clazz, (arrayOf(filePath1) + filePaths).map { File(it) }.toTypedArray())
+    fun givenDataSet(
+        clazz: Class<*>,
+        filePath1: String,
+        vararg filePaths: String
+    ) = givenDataSet(clazz, (arrayOf(filePath1) + filePaths).map { File(it) }.toTypedArray())
+
+
     /**
-     * Loads DataSets from Local Resources
+     * Loads DataSets using the DataSet Loader
      */
-    fun givenDataSet(clazz: KClass<*>, file1: File, vararg files: File) = givenDataSet(clazz.java, arrayOf(file1) + files)
+    fun givenDataSet(
+        clazz: KClass<*>,
+        file1: File,
+        vararg files: File
+    ) = givenDataSet(clazz.java, arrayOf(file1) + files)
+
     /**
-     * Loads DataSets from Local Resources
+     * Loads DataSets using the DataSet Loader
      */
-    fun givenDataSet(clazz: Class<*>, file1: File, vararg files: File) = givenDataSet(clazz, arrayOf(file1) + files)
+    fun givenDataSet(
+        clazz: KClass<*>,
+        files: Collection<File>
+    ) = givenDataSet(clazz.java, files.toTypedArray())
+
+    /**
+     * Loads DataSets using the DataSet Loader
+     */
+    fun givenDataSet(
+        clazz: Class<*>,
+        file1: File,
+        vararg files: File
+    ) = givenDataSet(clazz, arrayOf(file1) + files)
+
+    /**
+     * Loads DataSets using the DataSet Loader
+     */
+    fun givenDataSet(
+        clazz: Class<*>,
+        files: Collection<File>
+    ) = givenDataSet(clazz, files.toTypedArray())
 
     @Suppress("UsePropertyAccessSyntax")
     internal fun givenDataSet(
