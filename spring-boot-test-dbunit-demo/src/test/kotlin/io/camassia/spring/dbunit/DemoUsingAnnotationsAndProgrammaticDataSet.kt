@@ -3,13 +3,13 @@ package io.camassia.spring.dbunit
 import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
 import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
-import io.camassia.spring.dbunit.api.annotations.File
-import io.camassia.spring.dbunit.api.annotations.Override
+import io.camassia.spring.dbunit.api.annotations.Table
+import io.camassia.spring.dbunit.api.annotations.Table.Cell
+import io.camassia.spring.dbunit.api.annotations.Table.Row
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.jdbc.DataSourceBuilder
@@ -22,11 +22,11 @@ import javax.sql.DataSource
 @SpringBootTest(
     classes = [
         DemoJdbcRepository::class,
-        DemoUsingTemplatedAnnotations.DemoTestConfiguration::class
+        DemoUsingAnnotationsAndProgrammaticDataSet.DemoTestConfiguration::class
     ]
 )
 @AutoConfigureDbUnit
-class DemoUsingTemplatedAnnotations @Autowired constructor(
+class DemoUsingAnnotationsAndProgrammaticDataSet @Autowired constructor(
     private val dbUnit: DatabaseTester,
     private val repository: DemoJdbcRepository
 ) {
@@ -36,35 +36,19 @@ class DemoUsingTemplatedAnnotations @Autowired constructor(
         repository.createTable()
     }
 
-    @Nested
-    inner class RepositoryShouldQuerySuccessfully {
-        @Test
-        @DatabaseSetup(
-            files = [File("/TemplatedDemo.xml", Override("[ID]", "123"), Override("[NAME]", "Test"))]
+    @Test
+    @DatabaseSetup(tables = [
+        Table(
+            "demo",
+            Row(Cell("ID", "123"), Cell("NAME", "Test"))
         )
-        @DatabaseTeardown(
-            files = [File("/Empty.xml")]
-        )
-        fun `when using string overrides`() {
-            val result = repository.selectAll()
-            assertThat(result).hasSize(1)
-            assertThat(result[0].id).isEqualTo(123)
-            assertThat(result[0].name).isEqualTo("Test")
-        }
-
-        @Test
-        @DatabaseSetup(
-            files = [File("/TemplatedDemo.xml", Override("[ID]", "123"), Override("[NAME]", "[null]"))]
-        )
-        @DatabaseTeardown(
-            files = [File("/Empty.xml")]
-        )
-        fun `when using null overrides`() {
-            val result = repository.selectAll()
-            assertThat(result).hasSize(1)
-            assertThat(result[0].id).isEqualTo(123)
-            assertThat(result[0].name).isNull()
-        }
+    ])
+    @DatabaseTeardown(tables = [Table("demo")])
+    fun `repository should query successfully`() {
+        val result = repository.selectAll()
+        assertThat(result).hasSize(1)
+        assertThat(result[0].id).isEqualTo(123)
+        assertThat(result[0].name).isEqualTo("Test")
     }
 
     @AfterEach

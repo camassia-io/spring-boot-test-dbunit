@@ -2,6 +2,7 @@ package io.camassia.spring.dbunit
 
 import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
+import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.File
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -39,7 +40,7 @@ class DemoUsingTemplatedDatabaseTester @Autowired constructor(
         fun `when using overrides`() {
             dbUnit.givenDataSet(
                 DemoUsingTemplatedDatabaseTester::class.java,
-                File("/TemplatedDemo.xml", File.CellOverride("[ID]", 123), File.CellOverride("[NAME]", "Test"))
+                File("/TemplatedDemo.xml", Cell("[ID]", 123), Cell("[NAME]", "Test"))
             )
 
             val result = repository.selectAll()
@@ -52,7 +53,7 @@ class DemoUsingTemplatedDatabaseTester @Autowired constructor(
         fun `when using null overrides`() {
             dbUnit.givenDataSet(
                 DemoUsingTemplatedDatabaseTester::class.java,
-                File("/TemplatedDemo.xml", File.CellOverride("[ID]", 123), File.CellOverride("[NAME]", null))
+                File("/TemplatedDemo.xml", Cell("[ID]", 123), Cell("[NAME]", null))
             )
 
             val result = repository.selectAll()

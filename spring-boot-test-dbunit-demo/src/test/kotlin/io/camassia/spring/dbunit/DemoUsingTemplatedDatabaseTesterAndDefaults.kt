@@ -3,6 +3,7 @@ package io.camassia.spring.dbunit
 import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.TableDefaults
+import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.File
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -37,7 +38,7 @@ class DemoUsingTemplatedDatabaseTesterAndDefaults @Autowired constructor(
     fun `should query repository successfully`() {
         dbUnit.givenDataSet(
             DemoUsingTemplatedDatabaseTesterAndDefaults::class.java,
-            File("/TemplatedDemo.xml", File.CellOverride("[ID]", 123))
+            File("/TemplatedDemo.xml", Cell("[ID]", 123))
         )
 
         val result = repository.selectAll()
@@ -70,6 +71,6 @@ class DemoUsingTemplatedDatabaseTesterAndDefaults @Autowired constructor(
         fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
 
         @Bean
-        fun demoDefaults() = TableDefaults("demo", File.CellOverride("[NAME]", "Test"))
+        fun demoDefaults() = TableDefaults("demo", Cell("[NAME]", "Test"))
     }
 }

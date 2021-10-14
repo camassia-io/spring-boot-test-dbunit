@@ -10,6 +10,8 @@ This library aims to provide a highly customisable, easy to use way of testing t
 
 This library is written in Kotlin, but can be easily integrated into a Java project.
 
+---
+
 ## Getting Started
 
 For some demo examples see the spring-boot-test-dbunit-demo project
@@ -62,9 +64,12 @@ repositories {
 
 ### Create a Spring Boot Test
 
-The following standalone examples use an In Memory H2 Database with Springs JdbcTemplate as the test subject.
+The following standalone examples use an In Memory H2 Database with Springs `JdbcTemplate` as the test subject. 
+You would likely replace `JdbcTemplate` with your own Repository Class that you want to test.
 
 #### Using `DatabaseSetup` / `DatabaseTeardown` annotations
+
+##### With File Based DataSets
 
 These by default will load XML files you specify using the default DataSetLoader.
 The file types, & loader can be configured using Beans. See Customization below for more info.
@@ -146,8 +151,9 @@ See:
 - DemoUsingAnnotationsWithCustomDataSetLoader
 - DemoUsingTemplatedAnnotations
 - DemoUsingTemplatedAnnotationsAndDefaults
+- DemoUsingAnnotationsAndProgrammaticDataSet
 
-#### Templating
+##### With Templated File Based DataSets
 
 If using Templated files, e.g.
 
@@ -158,15 +164,17 @@ If using Templated files, e.g.
 </dataset>
 ```
 
-You can override these templated values using `@TemplatedDatabaseSetup` / `@TemplatedDatabaseTeardown`. 
+You can override these templated values using `@DatabaseSetup(files = [...])` / `@DatabaseTeardown(files= [...])`. 
 
 ```kotlin
-@TemplatedDatabaseSetup(
-    File(
-        "/TemplatedDemo.xml", 
-        Override("[ID]", "123"), // Overrides value "[ID]" in TemplatedDemo.xml with 123
-        Override("[NAME]", "[null]") // Overrides value "[ID]" in TemplatedDemo.xml with null
-    )
+@DatabaseSetup(
+    files = [
+        File(
+            "/TemplatedDemo.xml", 
+            Cell("[ID]", "123"), // Overrides value "[ID]" in TemplatedDemo.xml with 123
+            Cell("[NAME]", "[null]") // Overrides value "[ID]" in TemplatedDemo.xml with null
+        )
+    ]
 )
 ```
 
@@ -179,7 +187,7 @@ e.g.
 
 ```kotlin
 @Bean
-fun demoDefaults() = TableDefaults("demo", File.CellOverride("[NAME]", "Test"))
+fun demoDefaults() = TableDefaults("demo", Cell("[NAME]", "Test"))
 ```
 
 The example above overrides all dataset values for `[NAME]` with value `"Test"` unless a further override has been used in a `TemplatedDatabaseSetup` or `TemplatedDatabaseTeardown`, or via `DatabaseTester` directly.
@@ -191,6 +199,28 @@ See:
 - DemoUsingTemplatedAnnotationsAndDefaults
 - DemoUsingTemplatedDatabaseTester
 - DemoUsingTemplatedDatabaseTesterAndDefaults
+
+##### With Programmatic DataSets
+
+You can configure the entire DataSet using annotations if you like (rather than files).
+
+This can be combined with TableDefaults to ensure you only have to specify the bare minimum of cells you want to change per test.
+
+```kotlin
+@DatabaseSetup(
+    tables = [
+        Table(
+            "demo",
+            Row(Cell("ID", "123"), Cell("NAME", "Test"))
+        )
+    ]
+)
+```
+
+###### Useful Examples
+
+See:
+- DemoUsingAnnotationsAndProgrammaticDataSet
 
 #### Using `DatabaseTester` instead of annotations
 
@@ -288,6 +318,8 @@ Notes:
 - `@AutoConfigureDbUnit`: Ensures the relevant Db Unit Configuration is available for Component Scanning.
 - `DatabaseTester`: The DB Unit API, used for setting & retrieving the current database State
 
+---
+
 ## Customization
 
 Some sensible defaults have been set up as `@Bean`s within `SpringBootTestDbUnitConfiguration`.
@@ -310,9 +342,13 @@ Note there is a known bug which means all `Bean`s you create to customize the co
 See:
 - DemoUsingAnnotationsWithCustomDataSetLoader
 
+---
+
 ## Other Notes
 
 If you need to specify extra `TestExecutionListeners`, make sure you include `DependencyInjectionTestExecutionListener` & `DatabaseSetupAndTeardownTestExecutionListener`
+
+---
 
 ## Contributing
 

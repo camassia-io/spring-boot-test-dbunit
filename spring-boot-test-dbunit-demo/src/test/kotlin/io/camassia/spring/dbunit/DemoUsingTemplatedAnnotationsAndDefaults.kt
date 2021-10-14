@@ -1,13 +1,13 @@
 package io.camassia.spring.dbunit
 
 import io.camassia.spring.dbunit.api.DatabaseTester
+import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
+import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
 import io.camassia.spring.dbunit.api.annotations.File
 import io.camassia.spring.dbunit.api.annotations.Override
-import io.camassia.spring.dbunit.api.annotations.TemplatedDatabaseSetup
-import io.camassia.spring.dbunit.api.annotations.TemplatedDatabaseTeardown
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.TableDefaults
-import io.camassia.spring.dbunit.api.dataset.File.CellOverride
+import io.camassia.spring.dbunit.api.dataset.Cell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -38,11 +38,11 @@ class DemoUsingTemplatedAnnotationsAndDefaults @Autowired constructor(
     }
 
     @Test
-    @TemplatedDatabaseSetup(
-        File("/TemplatedDemo.xml", Override("[ID]", "123"))
+    @DatabaseSetup(
+        files = [File("/TemplatedDemo.xml", Override("[ID]", "123"))]
     )
-    @TemplatedDatabaseTeardown(
-        File("/Empty.xml")
+    @DatabaseTeardown(
+        files = [File("/Empty.xml")]
     )
     fun `when using string overrides`() {
         val result = repository.selectAll()
@@ -77,7 +77,7 @@ class DemoUsingTemplatedAnnotationsAndDefaults @Autowired constructor(
         @Bean
         fun demoDefaults() = TableDefaults(
             "demo",
-            CellOverride("[NAME]", "Test")
+            Cell("[NAME]", "Test")
         )
     }
 }

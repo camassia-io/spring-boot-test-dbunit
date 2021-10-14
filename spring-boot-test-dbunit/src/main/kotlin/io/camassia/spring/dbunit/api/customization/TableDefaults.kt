@@ -1,7 +1,7 @@
 package io.camassia.spring.dbunit.api.customization
 
-import io.camassia.spring.dbunit.api.dataset.File
+import io.camassia.spring.dbunit.api.dataset.Cell
 
-data class TableDefaults(val table: String, val overrides: Set<File.CellOverride>) {
-    constructor(table: String, vararg overrides: File.CellOverride): this(table, overrides.toSet())
+data class TableDefaults(val table: String, val overrides: Set<Cell>) {
+    constructor(table: String, vararg overrides: Cell): this(table, overrides.toSet())
 }

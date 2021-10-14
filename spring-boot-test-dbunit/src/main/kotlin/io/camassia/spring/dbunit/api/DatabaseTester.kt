@@ -4,8 +4,11 @@ import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
 import io.camassia.spring.dbunit.api.customization.TableDefaults
+import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
 import io.camassia.spring.dbunit.api.dataset.File
+import io.camassia.spring.dbunit.api.dataset.Table
+import io.camassia.spring.dbunit.api.dataset.builder.TableBasedDataSetBuilder
 import org.dbunit.AbstractDatabaseTester
 import org.dbunit.database.DatabaseConfig
 import org.dbunit.database.DatabaseConnection
@@ -93,6 +96,9 @@ open class DatabaseTester(
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) = givenDataSet(clazz, listOf(file1) + files, operation)
 
+    /**
+     * Loads DataSets using the DataSet Loader
+     */
     @Suppress("UsePropertyAccessSyntax")
     fun givenDataSet(
         clazz: Class<*>,
@@ -104,8 +110,8 @@ open class DatabaseTester(
             if (defaults.isNotEmpty() || file.overrides.isNotEmpty()) {
                 ReplacementDataSet(underlying).also { ds ->
                     val datasetTables = underlying.tableNames.map { it.toLowerCase() }.toSet()
-                    val defaultOverrides: Set<File.CellOverride> = defaults.filterKeys { datasetTables.contains(it.toLowerCase()) }.values.map { it.overrides }.flatten().toSet()
-                    val testOverrides: Set<File.CellOverride> = file.overrides
+                    val defaultOverrides: Set<Cell> = defaults.filterKeys { datasetTables.contains(it.toLowerCase()) }.values.map { it.overrides }.flatten().toSet()
+                    val testOverrides: Set<Cell> = file.overrides
 
                     (defaultOverrides + testOverrides).forEach { (key, value) ->
                         ds.addReplacementObject(key, value)
@@ -117,6 +123,28 @@ open class DatabaseTester(
             else CompositeDataSet(it.toTypedArray())
         }
 
+        setSetUpOperation(operation.underlying)
+        setDataSet(dataSet)
+        onSetup()
+    }
+
+    /**
+     * Loads a DataSet built programatically
+     */
+    fun givenDataSet(
+        vararg tables: Table,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(tables.toList(), operation)
+
+    /**
+     * Loads a DataSet built programatically
+     */
+    @Suppress("UsePropertyAccessSyntax")
+    fun givenDataSet(
+        tables: Collection<Table>,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) {
+        val dataSet: IDataSet = TableBasedDataSetBuilder(tables, defaults.values).build()
         setSetUpOperation(operation.underlying)
         setDataSet(dataSet)
         onSetup()
