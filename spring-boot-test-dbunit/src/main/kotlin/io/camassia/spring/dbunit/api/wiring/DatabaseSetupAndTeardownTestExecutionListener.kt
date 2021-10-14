@@ -19,48 +19,40 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
 
     override fun getOrder(): Int = Ordered.LOWEST_PRECEDENCE
 
-    override fun beforeTestExecution(ctx: TestContext) {
-        val annotations: Array<Annotation> = ctx.annotations()
-        val annotation: DatabaseSetup? = annotations.find(DatabaseSetup::class)
-        if (annotation != null) {
-            if (!annotation.isValid()) throw DbUnitException("Must use only one type of @DatabaseSetup Migration (value/files/tables)")
-            val files: List<File> = annotation.value.map { File(it) }.takeIf { it.isNotEmpty() } ?: annotation.files.map { it.toFile() }
-            val tables = annotation.tables.map { it.toTable() }
-            givenDataSet(ctx, files, tables, annotation.operation)
+    override fun beforeTestExecution(ctx: TestContext) = ctx.handleAnnotation(DatabaseSetup::class, { it.value }, { it.files }, { it.tables }, { it.operation })
+
+    override fun afterTestExecution(ctx: TestContext) = ctx.handleAnnotation(DatabaseTeardown::class, { it.value }, { it.files }, { it.tables }, { it.operation })
+
+    private fun <T : Any> TestContext.handleAnnotation(
+        clazz: KClass<T>,
+        filenamesOf: (T) -> Array<out String>,
+        filesOf: (T) -> Array<FileAnnotation>,
+        tablesOf: (T) -> Array<TableAnnotation>,
+        operationOf: (T) -> DatabaseOperation
+    ) {
+        val annotations = this.annotations().find(clazz)
+        if(annotations.isEmpty()) return
+
+        // Validate Each Annotation uses a valid property combination
+        if (annotations.any { a -> listOf(filenamesOf(a), filesOf(a), tablesOf(a)).filter { it.isNotEmpty() }.size != 1 }) {
+            throw DbUnitException("Must use only one type of @${clazz.simpleName} Migration (value/files/tables)")
+        }
+
+        annotations.forEach { annotation ->
+            val files: List<File> = filenamesOf(annotation).map { File(it) }.takeIf { it.isNotEmpty() } ?: filesOf(annotation).map { it.toFile() }
+            val tables = tablesOf(annotation).map { it.toTable() }
+            files.takeIf { it.isNotEmpty() }
+                ?.let {
+                    val dbUnit = dbUnit()
+                    dbUnit.givenDataSet(testClass, it, operationOf(annotation))
+                }
+            tables.takeIf { it.isNotEmpty() }
+                ?.let {
+                    val dbUnit = dbUnit()
+                    dbUnit.givenDataSet(it, operationOf(annotation))
+                }
         }
     }
-
-    override fun afterTestExecution(ctx: TestContext) {
-        val annotations: Array<Annotation> = ctx.annotations()
-        val annotation: DatabaseTeardown? = annotations.find(DatabaseTeardown::class)
-        if (annotation != null) {
-            if (!annotation.isValid()) throw DbUnitException("Must use only one type of @DatabaseTeardown Migration (value/files/tables)")
-            val files: List<File> = annotation.value.map { File(it) }.takeIf { it.isNotEmpty() } ?: annotation.files.map { it.toFile() }
-            val tables = annotation.tables.map { it.toTable() }
-            givenDataSet(ctx, files, tables, annotation.operation)
-        }
-    }
-
-    private fun givenDataSet(ctx: TestContext, files: Collection<File>, tables: Collection<Table>, operation: DatabaseOperation) {
-        files.takeIf { it.isNotEmpty() }
-            ?.let {
-                val dbUnit = ctx.dbUnit()
-                dbUnit.givenDataSet(ctx.testClass, it, operation)
-            }
-        tables.takeIf { it.isNotEmpty() }
-            ?.let {
-                val dbUnit = ctx.dbUnit()
-                dbUnit.givenDataSet(it, operation)
-            }
-    }
-
-    private fun DatabaseSetup.isValid() = listOf(
-        this.value, this.files, this.tables
-    ).filter { it.isNotEmpty() }.size == 1
-
-    private fun DatabaseTeardown.isValid() = listOf(
-        this.value, this.files, this.tables
-    ).filter { it.isNotEmpty() }.size == 1
 
     private fun FileAnnotation.toFile() = File(
         this.name,
@@ -81,5 +73,5 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
 
     private fun TestContext.annotations() = (this.testClass.annotations + this.testMethod.annotations)
     private fun TestContext.dbUnit() = applicationContext.getBean(DatabaseTester::class.java)
-    private fun <T : Any> Array<Annotation>.find(clazz: KClass<T>): T? = filterIsInstance(clazz.java).firstOrNull()
+    private fun <T : Any> Array<Annotation>.find(clazz: KClass<T>): List<T> = filterIsInstance(clazz.java)
 }

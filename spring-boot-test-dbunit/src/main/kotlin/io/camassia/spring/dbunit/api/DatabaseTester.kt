@@ -122,10 +122,7 @@ open class DatabaseTester(
             if (it.size == 1) it.first()
             else CompositeDataSet(it.toTypedArray())
         }
-
-        setSetUpOperation(operation.underlying)
-        setDataSet(dataSet)
-        onSetup()
+        givenDataSet(dataSet, operation)
     }
 
     /**
@@ -145,6 +142,17 @@ open class DatabaseTester(
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
         val dataSet: IDataSet = TableBasedDataSetBuilder(tables, defaults.values).build()
+        givenDataSet(dataSet, operation)
+    }
+
+    /**
+     * Loads a DataSet
+     */
+    @Suppress("UsePropertyAccessSyntax")
+    fun givenDataSet(
+        dataSet: IDataSet,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) {
         setSetUpOperation(operation.underlying)
         setDataSet(dataSet)
         onSetup()

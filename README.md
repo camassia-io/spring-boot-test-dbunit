@@ -191,7 +191,7 @@ You can override these templated values using `@DatabaseSetup(files = [...])` / 
 Note that due to how DbUnits replacement dataset works, you have to reference overrides by the value, not the column name.
 As a result, it's good practice to use brackets, or some other kind of indicator to make it obvious what columns should be overridden, the example above uses square brackets for this purpose.
 
-You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Customization](https://github.com/camassia-io/spring-boot-test-dbunit#customization) for more info.
+You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Setting Global Defaults](https://github.com/camassia-io/spring-boot-test-dbunit#global-defaults-for-each-table) for more info.
 
 ###### Useful Examples
 
@@ -308,7 +308,7 @@ class SomeTestClass @Autowired constructor(
 }
 ```
 
-You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Customization](https://github.com/camassia-io/spring-boot-test-dbunit#customization) for more info.
+You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Setting Global Defaults](https://github.com/camassia-io/spring-boot-test-dbunit#global-defaults-for-each-table) for more info.
 
 ###### Useful Examples
 
@@ -336,7 +336,7 @@ You can use this to:
 - Add DatabaseConfig
 - Change the DataSetLoader from the default XmlLocalResourceDataSetLoader
 - Modify the Database Connection DBUnit uses
-- Add Table Cell Defaults
+- [Add Table Column Value Defaults](https://github.com/camassia-io/spring-boot-test-dbunit#global-defaults-for-each-table)
   
 Note there is a known bug which means all `Bean`s you create to customize the config need to be annotated with `@Primary`
 
