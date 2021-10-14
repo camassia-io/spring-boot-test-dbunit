@@ -18,6 +18,8 @@ For some demo examples see the spring-boot-test-dbunit-demo project
 
 ### Register GH Packages as a Source Repository
 
+This project is published to GitHub Packages. Maven Central releases are coming soon...
+
 #### Gradle
 
 ```
@@ -62,10 +64,18 @@ repositories {
 </dependency>
 ```
 
-### Create a Spring Boot Test
+---
+
+### Writing Tests
 
 The following standalone examples use an In Memory H2 Database with Springs `JdbcTemplate` as the test subject. 
 You would likely replace `JdbcTemplate` with your own Repository Class that you want to test.
+
+- [Using DatabaseSetup & DatabaseTeardown Annotations](https://github.com/camassia-io/spring-boot-test-dbunit#using-databasesetup--databaseteardown-annotations)
+  - [With DataSet Files](https://github.com/camassia-io/spring-boot-test-dbunit#with-file-based-datasets)
+  - [With Templated DataSet Files](https://github.com/camassia-io/spring-boot-test-dbunit#with-templated-file-based-datasets)
+  - [With Programmatic DataSets](https://github.com/camassia-io/spring-boot-test-dbunit#with-programmatic-datasets)
+- [Using DatabaseTester directly](https://github.com/camassia-io/spring-boot-test-dbunit#using-databasetester-instead-of-annotations)
 
 #### Using `DatabaseSetup` / `DatabaseTeardown` annotations
 
@@ -181,16 +191,7 @@ You can override these templated values using `@DatabaseSetup(files = [...])` / 
 Note that due to how DbUnits replacement dataset works, you have to reference overrides by the value, not the column name.
 As a result, it's good practice to use brackets, or some other kind of indicator to make it obvious what columns should be overridden, the example above uses square brackets for this purpose.
 
-You can also set up global default overrides, e.g. in case you only one to override 1 or 2 fields per test. 
-You can achieve this by registering one or more beans of type `TableDefaults`
-e.g.
-
-```kotlin
-@Bean
-fun demoDefaults() = TableDefaults("demo", Cell("[NAME]", "Test"))
-```
-
-The example above overrides all dataset values for `[NAME]` with value `"Test"` unless a further override has been used in a `TemplatedDatabaseSetup` or `TemplatedDatabaseTeardown`, or via `DatabaseTester` directly.
+You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Customization](https://github.com/camassia-io/spring-boot-test-dbunit#customization) for more info.
 
 ###### Useful Examples
 
@@ -216,6 +217,8 @@ This can be combined with TableDefaults to ensure you only have to specify the b
     ]
 )
 ```
+
+You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Customization](https://github.com/camassia-io/spring-boot-test-dbunit#customization) for more info.
 
 ###### Useful Examples
 
@@ -305,6 +308,8 @@ class SomeTestClass @Autowired constructor(
 }
 ```
 
+You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Customization](https://github.com/camassia-io/spring-boot-test-dbunit#customization) for more info.
+
 ###### Useful Examples
 
 See:
@@ -331,10 +336,22 @@ You can use this to:
 - Add DatabaseConfig
 - Change the DataSetLoader from the default XmlLocalResourceDataSetLoader
 - Modify the Database Connection DBUnit uses
-
-etc
-
+- Add Table Cell Defaults
+  
 Note there is a known bug which means all `Bean`s you create to customize the config need to be annotated with `@Primary`
+
+##### Global Defaults for each Table
+
+You can set up global default values for each column of each table, e.g. in case you only want to override 1 or 2 fields per test.
+You can achieve this by registering one or more beans of type `TableDefaults`
+e.g.
+
+```kotlin
+@Bean
+fun demoDefaults() = TableDefaults("demo", Cell("[NAME]", "Test"))
+```
+
+The example above overrides all dataset values for `[NAME]` with value `"Test"` unless a further override has been used in a `DatabaseSetup` or `DatabaseTeardown`, or via `DatabaseTester` directly.
 
 
 ###### Useful Examples
