@@ -30,7 +30,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
         tablesOf: (T) -> Array<TableAnnotation>,
         operationOf: (T) -> DatabaseOperation
     ) {
-        val annotations = this.annotations().find(clazz)
+        val annotations = this.annotations().filterIsInstance(clazz.java)
         if(annotations.isEmpty()) return
 
         // Validate Each Annotation uses a valid property combination
@@ -73,5 +73,4 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
 
     private fun TestContext.annotations() = (this.testClass.annotations + this.testMethod.annotations)
     private fun TestContext.dbUnit() = applicationContext.getBean(DatabaseTester::class.java)
-    private fun <T : Any> Array<Annotation>.find(clazz: KClass<T>): List<T> = filterIsInstance(clazz.java)
 }
