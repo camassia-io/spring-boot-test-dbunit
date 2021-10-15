@@ -15,7 +15,7 @@ internal class TableBasedDataSetBuilder(
     tables: Collection<Table>,
     defaults: Collection<TableDefaults>
 ) {
-    private val tables: Map<String, Collection<Row>> = tables.groupBy { it.name }.mapValues { (name, tables) ->
+    private val tables: Map<String, Collection<Row>> = tables.groupBy { it.name }.mapValues { (_, tables) ->
         tables.flatMap { it.rows }
     }
     private val defaults: Map<String, Set<Cell>> = defaults.groupBy { it.table }.mapValues { (_, defaults) ->
