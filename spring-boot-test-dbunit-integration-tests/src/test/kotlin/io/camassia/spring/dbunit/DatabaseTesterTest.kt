@@ -1,16 +1,16 @@
 package io.camassia.spring.dbunit
 
-import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
-import io.camassia.spring.dbunit.api.annotations.File
-import io.camassia.spring.dbunit.api.annotations.Override
-import io.camassia.spring.dbunit.api.annotations.Table
-import io.camassia.spring.dbunit.api.annotations.Table.Cell
-import io.camassia.spring.dbunit.api.annotations.Table.Row
+import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
+import io.camassia.spring.dbunit.api.dataset.Cell
+import io.camassia.spring.dbunit.api.dataset.File
+import io.camassia.spring.dbunit.api.dataset.Row
+import io.camassia.spring.dbunit.api.dataset.Table
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -21,17 +21,20 @@ import javax.sql.DataSource
 @SpringBootTest(
     classes = [
         TestApp::class,
-        DatabaseSetupAnnotation.DemoTestConfiguration::class
+        DatabaseTesterTest.DemoTestConfiguration::class
     ]
 )
 @AutoConfigureDbUnit
-class DatabaseSetupAnnotation : RepositoryTest() {
+class DatabaseTesterTest @Autowired constructor(
+    private val dbunit: DatabaseTester
+) : RepositoryTest() {
 
     @Nested
     inner class WithFilenames {
         @Test
-        @DatabaseSetup("/Demo-WithOneRowInMultipleTables.xml")
         fun `should handle files with one row in multiple tables`() {
+            dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo-WithOneRowInMultipleTables.xml")
+
             val result1 = selectAllFrom("demo1")
             assertThat(result1).hasSize(1)
             assertThat(result1[0].component1()).isEqualTo(1)
@@ -44,8 +47,9 @@ class DatabaseSetupAnnotation : RepositoryTest() {
         }
 
         @Test
-        @DatabaseSetup("/Demo-WithMultipleRowsInOneTable.xml")
         fun `should handle files with multiple rows in one table`() {
+            dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo-WithMultipleRowsInOneTable.xml")
+
             val result = selectAllFrom("demo1")
             assertThat(result).hasSize(2)
             assertThat(result[0].component1()).isEqualTo(1)
@@ -55,8 +59,9 @@ class DatabaseSetupAnnotation : RepositoryTest() {
         }
 
         @Test
-        @DatabaseSetup("/Demo1.xml", "/Demo2.xml")
         fun `should handle multiple files`() {
+            dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo1.xml", "/Demo2.xml")
+
             val result1 = selectAllFrom("demo1")
             assertThat(result1).hasSize(1)
             assertThat(result1[0].component1()).isEqualTo(1)
@@ -68,35 +73,36 @@ class DatabaseSetupAnnotation : RepositoryTest() {
             assertThat(result2[0].component2()).isEqualTo("Test2")
         }
 
-        @Nested
-        @DatabaseSetup("/Demo1.xml")
-        inner class ShouldHandleMultipleLevelsOfAnnotations {
-            @Test
-            @DatabaseSetup("/Demo2.xml")
-            fun `when using inner classes`() {
-                val result1 = selectAllFrom("demo1")
-                assertThat(result1).hasSize(1)
-                assertThat(result1[0].component1()).isEqualTo(1)
-                assertThat(result1[0].component2()).isEqualTo("Test1")
+        @Test
+        fun `should handle sequential setups`() {
+            dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo1.xml")
+            dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo2.xml")
 
-                val result2 = selectAllFrom("demo2")
-                assertThat(result2).hasSize(1)
-                assertThat(result2[0].component1()).isEqualTo(2)
-                assertThat(result2[0].component2()).isEqualTo("Test2")
-            }
+            val result1 = selectAllFrom("demo1")
+            assertThat(result1).hasSize(1)
+            assertThat(result1[0].component1()).isEqualTo(1)
+            assertThat(result1[0].component2()).isEqualTo("Test1")
+
+            val result2 = selectAllFrom("demo2")
+            assertThat(result2).hasSize(1)
+            assertThat(result2[0].component1()).isEqualTo(2)
+            assertThat(result2[0].component2()).isEqualTo("Test2")
         }
     }
 
     @Nested
     inner class WithTemplatedFiles {
         @Test
-        @DatabaseSetup(files = [
-            File("/TemplatedDemo-WithOneRowInMultipleTables.xml",
-                Override("[ID1]", "1"), Override("[NAME1]", "Test1"),
-                Override("[ID2]", "2"), Override("[NAME2]", "Test2")
-            )
-        ])
         fun `should handle files with one row in multiple tables`() {
+            dbunit.givenDataSet(
+                DatabaseTesterTest::class,
+                File(
+                    "/TemplatedDemo-WithOneRowInMultipleTables.xml",
+                    Cell("[ID1]", "1"), Cell("[NAME1]", "Test1"),
+                    Cell("[ID2]", "2"), Cell("[NAME2]", "Test2")
+                )
+            )
+
             val result1 = selectAllFrom("demo1")
             assertThat(result1).hasSize(1)
             assertThat(result1[0].component1()).isEqualTo(1)
@@ -109,13 +115,16 @@ class DatabaseSetupAnnotation : RepositoryTest() {
         }
 
         @Test
-        @DatabaseSetup(files = [
-            File("/TemplatedDemo-WithMultipleRowsInOneTable.xml",
-                Override("[ID1]", "1"), Override("[NAME1]", "Test1"),
-                Override("[ID2]", "2"), Override("[NAME2]", "Test2")
-            )
-        ])
         fun `should handle files with multiple rows in one table`() {
+            dbunit.givenDataSet(
+                DatabaseTesterTest::class,
+                File(
+                    "/TemplatedDemo-WithMultipleRowsInOneTable.xml",
+                    Cell("[ID1]", "1"), Cell("[NAME1]", "Test1"),
+                    Cell("[ID2]", "2"), Cell("[NAME2]", "Test2")
+                )
+            )
+
             val result = selectAllFrom("demo1")
             assertThat(result).hasSize(2)
             assertThat(result[0].component1()).isEqualTo(1)
@@ -125,15 +134,19 @@ class DatabaseSetupAnnotation : RepositoryTest() {
         }
 
         @Test
-        @DatabaseSetup(files = [
-            File("/TemplatedDemo1.xml",
-                Override("[ID]", "1"), Override("[NAME]", "Test1")
-            ),
-            File("/TemplatedDemo2.xml",
-                Override("[ID]", "2"), Override("[NAME]", "Test2")
-            )
-        ])
         fun `should handle multiple files`() {
+            dbunit.givenDataSet(
+                DatabaseTesterTest::class,
+                File(
+                    "/TemplatedDemo1.xml",
+                    Cell("[ID]", "1"), Cell("[NAME]", "Test1")
+                ),
+                File(
+                    "/TemplatedDemo2.xml",
+                    Cell("[ID]", "2"), Cell("[NAME]", "Test2")
+                )
+            )
+
             val result1 = selectAllFrom("demo1")
             assertThat(result1).hasSize(1)
             assertThat(result1[0].component1()).isEqualTo(1)
@@ -145,45 +158,51 @@ class DatabaseSetupAnnotation : RepositoryTest() {
             assertThat(result2[0].component2()).isEqualTo("Test2")
         }
 
-        @Nested
-        @DatabaseSetup(files = [
-            File("/TemplatedDemo1.xml",
-                Override("[ID]", "1"), Override("[NAME]", "Test1")
-            )
-        ])
-        inner class ShouldHandleMultipleLevelsOfAnnotations {
-            @Test
-            @DatabaseSetup(files = [
-                File("/TemplatedDemo2.xml",
-                    Override("[ID]", "2"), Override("[NAME]", "Test2")
+        @Test
+        fun `should handle multiple setups`() {
+            dbunit.givenDataSet(
+                DatabaseTesterTest::class,
+                File(
+                    "/TemplatedDemo1.xml",
+                    Cell("[ID]", "1"), Cell("[NAME]", "Test1")
                 )
-            ])
-            fun `when using inner classes`() {
-                val result1 = selectAllFrom("demo1")
-                assertThat(result1).hasSize(1)
-                assertThat(result1[0].component1()).isEqualTo(1)
-                assertThat(result1[0].component2()).isEqualTo("Test1")
+            )
+            dbunit.givenDataSet(
+                DatabaseTesterTest::class,
+                File(
+                    "/TemplatedDemo2.xml",
+                    Cell("[ID]", "2"), Cell("[NAME]", "Test2")
+                )
+            )
 
-                val result2 = selectAllFrom("demo2")
-                assertThat(result2).hasSize(1)
-                assertThat(result2[0].component1()).isEqualTo(2)
-                assertThat(result2[0].component2()).isEqualTo("Test2")
-            }
+            val result1 = selectAllFrom("demo1")
+            assertThat(result1).hasSize(1)
+            assertThat(result1[0].component1()).isEqualTo(1)
+            assertThat(result1[0].component2()).isEqualTo("Test1")
+
+            val result2 = selectAllFrom("demo2")
+            assertThat(result2).hasSize(1)
+            assertThat(result2[0].component1()).isEqualTo(2)
+            assertThat(result2[0].component2()).isEqualTo("Test2")
         }
+
     }
 
     @Nested
     inner class WithProgrammaticDataSet {
         @Test
-        @DatabaseSetup(tables = [
-            Table("demo1",
-                Row(Cell("id", "1"), Cell("name", "Test1"))
-            ),
-            Table("demo2",
-                Row(Cell("id", "2"), Cell("name", "Test2"))
-            )
-        ])
         fun `should handle datasets with one row in multiple tables`() {
+            dbunit.givenDataSet(
+                Table(
+                    "demo1",
+                    Row(Cell("id", "1"), Cell("name", "Test1"))
+                ),
+                Table(
+                    "demo2",
+                    Row(Cell("id", "2"), Cell("name", "Test2"))
+                )
+            )
+
             val result1 = selectAllFrom("demo1")
             assertThat(result1).hasSize(1)
             assertThat(result1[0].component1()).isEqualTo(1)
@@ -196,13 +215,15 @@ class DatabaseSetupAnnotation : RepositoryTest() {
         }
 
         @Test
-        @DatabaseSetup(tables = [
-            Table("demo1",
-                Row(Cell("id", "1"), Cell("name", "Test1")),
-                Row(Cell("id", "2"), Cell("name", "Test2"))
-            )
-        ])
         fun `should handle datasets with multiple rows in one table`() {
+            dbunit.givenDataSet(
+                Table(
+                    "demo1",
+                    Row(Cell("id", "1"), Cell("name", "Test1")),
+                    Row(Cell("id", "2"), Cell("name", "Test2"))
+                )
+            )
+
             val result = selectAllFrom("demo1")
             assertThat(result).hasSize(2)
             assertThat(result[0].component1()).isEqualTo(1)
@@ -212,20 +233,24 @@ class DatabaseSetupAnnotation : RepositoryTest() {
         }
 
         @Nested
-        @DatabaseSetup(tables = [
-            Table("demo1",
-                Row(Cell("id", "1"), Cell("name", "Test1"))
-            )
-        ])
-        inner class ShouldHandleMultipleLevelsOfAnnotations {
+        inner class ShouldHandleMultipleDataSetUps {
 
             @Test
-            @DatabaseSetup(tables = [
-                Table("demo1",
-                    Row(Cell("id", "2"), Cell("name", "Test2"))
+            fun `when the same table`() {
+                dbunit.givenDataSet(
+                    Table(
+                        "demo1",
+                        Row(Cell("id", "1"), Cell("name", "Test1"))
+                    )
                 )
-            ], operation = DatabaseOperation.INSERT)
-            fun `when using inner classes for the same table`() {
+                dbunit.givenDataSet(
+                    Table(
+                        "demo1",
+                        Row(Cell("id", "2"), Cell("name", "Test2"))
+                    ),
+                    operation = DatabaseOperation.INSERT
+                )
+
                 val result = selectAllFrom("demo1")
                 assertThat(result).hasSize(2)
                 assertThat(result[0].component1()).isEqualTo(1)
@@ -235,12 +260,20 @@ class DatabaseSetupAnnotation : RepositoryTest() {
             }
 
             @Test
-            @DatabaseSetup(tables = [
-                Table("demo2",
-                    Row(Cell("id", "2"), Cell("name", "Test2"))
+            fun `when different tables`() {
+                dbunit.givenDataSet(
+                    Table(
+                        "demo1",
+                        Row(Cell("id", "1"), Cell("name", "Test1"))
+                    )
                 )
-            ])
-            fun `when using inner classes for different tables`() {
+                dbunit.givenDataSet(
+                    Table(
+                        "demo2",
+                        Row(Cell("id", "2"), Cell("name", "Test2"))
+                    )
+                )
+
                 val result1 = selectAllFrom("demo1")
                 assertThat(result1).hasSize(1)
                 assertThat(result1[0].component1()).isEqualTo(1)

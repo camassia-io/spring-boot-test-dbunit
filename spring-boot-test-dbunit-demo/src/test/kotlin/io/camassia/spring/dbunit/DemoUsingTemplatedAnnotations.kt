@@ -1,10 +1,10 @@
 package io.camassia.spring.dbunit
 
 import io.camassia.spring.dbunit.api.DatabaseTester
+import io.camassia.spring.dbunit.api.annotations.Cell
 import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
 import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
 import io.camassia.spring.dbunit.api.annotations.File
-import io.camassia.spring.dbunit.api.annotations.Override
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -40,7 +40,7 @@ class DemoUsingTemplatedAnnotations @Autowired constructor(
     inner class RepositoryShouldQuerySuccessfully {
         @Test
         @DatabaseSetup(
-            files = [File("/TemplatedDemo.xml", Override("[ID]", "123"), Override("[NAME]", "Test"))]
+            files = [File("/TemplatedDemo.xml", Cell("[ID]", "123"), Cell("[NAME]", "Test"))]
         )
         @DatabaseTeardown(
             files = [File("/Empty.xml")]
@@ -54,7 +54,7 @@ class DemoUsingTemplatedAnnotations @Autowired constructor(
 
         @Test
         @DatabaseSetup(
-            files = [File("/TemplatedDemo.xml", Override("[ID]", "123"), Override("[NAME]", "[null]"))]
+            files = [File("/TemplatedDemo.xml", Cell("[ID]", "123"), Cell("[NAME]", "[null]"))]
         )
         @DatabaseTeardown(
             files = [File("/Empty.xml")]

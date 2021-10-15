@@ -1,13 +1,12 @@
 package io.camassia.spring.dbunit
 
 import io.camassia.spring.dbunit.api.DatabaseTester
+import io.camassia.spring.dbunit.api.annotations.Cell
 import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
 import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
 import io.camassia.spring.dbunit.api.annotations.File
-import io.camassia.spring.dbunit.api.annotations.Override
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.TableDefaults
-import io.camassia.spring.dbunit.api.dataset.Cell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +38,7 @@ class DemoUsingTemplatedAnnotationsAndDefaults @Autowired constructor(
 
     @Test
     @DatabaseSetup(
-        files = [File("/TemplatedDemo.xml", Override("[ID]", "123"))]
+        files = [File("/TemplatedDemo.xml", Cell("[ID]", "123"))]
     )
     @DatabaseTeardown(
         files = [File("/Empty.xml")]
@@ -77,7 +76,7 @@ class DemoUsingTemplatedAnnotationsAndDefaults @Autowired constructor(
         @Bean
         fun demoDefaults() = TableDefaults(
             "demo",
-            Cell("[NAME]", "Test")
+            "[NAME]" to "Test"
         )
     }
 }

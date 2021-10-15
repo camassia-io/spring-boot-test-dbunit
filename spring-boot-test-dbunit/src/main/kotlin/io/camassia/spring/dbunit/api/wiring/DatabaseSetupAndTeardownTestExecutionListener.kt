@@ -7,6 +7,7 @@ import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
 import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.File
+import io.camassia.spring.dbunit.api.dataset.Row
 import io.camassia.spring.dbunit.api.dataset.Table
 import org.springframework.core.Ordered
 import org.springframework.test.context.TestContext
@@ -58,7 +59,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
         this.name,
         this.overrides.map { override ->
             Cell(
-                override.key,
+                override.name,
                 override.value
             )
         }.toSet()
@@ -67,7 +68,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
     private fun TableAnnotation.toTable() = Table(
         this.name,
         this.rows.map { row ->
-            Table.Row(row.cells.associate { cell -> cell.name to cell.value })
+            Row(row.cells.associate { cell -> cell.name to cell.value })
         }
     )
 

@@ -2,6 +2,7 @@ package io.camassia.spring.dbunit.api.dataset.builder
 
 import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.Cell
+import io.camassia.spring.dbunit.api.dataset.Row
 import io.camassia.spring.dbunit.api.dataset.Table
 import org.dbunit.dataset.CachedDataSet
 import org.dbunit.dataset.Column
@@ -14,10 +15,10 @@ internal class TableBasedDataSetBuilder(
     tables: Collection<Table>,
     defaults: Collection<TableDefaults>
 ) {
-    private val tables: Map<String, Table> = tables.groupBy { it.name }.mapValues { (name, tables) ->
-        Table(name, tables.flatMap { it.rows })
+    private val tables: Map<String, Collection<Row>> = tables.groupBy { it.name }.mapValues { (name, tables) ->
+        tables.flatMap { it.rows }
     }
-    private val defaults: Map<String, Set<Cell>> = defaults.groupBy { it.table }.mapValues { (name, defaults) ->
+    private val defaults: Map<String, Set<Cell>> = defaults.groupBy { it.table }.mapValues { (_, defaults) ->
         defaults.flatMap { it.overrides }.toSet()
     }.filterKeys { this.tables.containsKey(it) }
 
@@ -25,20 +26,20 @@ internal class TableBasedDataSetBuilder(
         val dataSet = CachedDataSet()
         val consumer = BufferedConsumer(dataSet)
         consumer.startDataSet()
-        this.tables.values.forEach { table: Table ->
-            val defaults: Set<Cell> = this.defaults[table.name] ?: emptySet()
-            val columns: Map<String, Column> = (table.rows.flatMap { it.cells.toList() }.map { it.first } + defaults.map { it.key })
+        this.tables.forEach { (name, rows) ->
+            val defaults: Set<Cell> = this.defaults[name] ?: emptySet()
+            val columns: Map<String, Column> = (rows.flatMap { it.cells.toList() }.map { it.first } + defaults.map { it.key })
                 .distinct()
                 .associateBy({ it }, { Column(it, DataType.UNKNOWN) })
             consumer.startTable(
                 DefaultTableMetaData(
-                    table.name,
+                    name,
                     columns.values.toTypedArray()
                 )
             )
 
-            if(table.rows.isEmpty()) consumer.row(arrayOfNulls(columns.size))
-            else table.rows.forEach { row ->
+            if(rows.isEmpty()) consumer.row(arrayOfNulls(columns.size))
+            else rows.forEach { row ->
                 val cells: Array<out Any?> = columns
                     .map { (n,v) -> Cell(n,v) }
                     .map { cell ->

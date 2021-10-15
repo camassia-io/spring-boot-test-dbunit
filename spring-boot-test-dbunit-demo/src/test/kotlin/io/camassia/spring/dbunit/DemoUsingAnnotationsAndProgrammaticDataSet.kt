@@ -1,11 +1,11 @@
 package io.camassia.spring.dbunit
 
 import io.camassia.spring.dbunit.api.DatabaseTester
+import io.camassia.spring.dbunit.api.annotations.Cell
 import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
 import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
+import io.camassia.spring.dbunit.api.annotations.Row
 import io.camassia.spring.dbunit.api.annotations.Table
-import io.camassia.spring.dbunit.api.annotations.Table.Cell
-import io.camassia.spring.dbunit.api.annotations.Table.Row
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
