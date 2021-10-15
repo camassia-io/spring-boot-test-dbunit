@@ -13,6 +13,7 @@ import org.dbunit.AbstractDatabaseTester
 import org.dbunit.database.DatabaseConfig
 import org.dbunit.database.DatabaseConnection
 import org.dbunit.database.IDatabaseConnection
+import org.dbunit.dataset.CachedDataSet
 import org.dbunit.dataset.CompositeDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
@@ -161,12 +162,12 @@ open class DatabaseTester(
     /**
      * Selects * from each table of the database & returns the result as an IDataSet for dataset assertions
      */
-    fun createDataset(): IDataSet = usingConnection { it.createDataSet() }
+    fun createDataset(): IDataSet = usingConnection { CachedDataSet(it.createDataSet()) }
 
     /**
      * Selects * from each table specified & returns the result as an IDataSet for dataset assertions
      */
-    fun createDataset(vararg tableNames: String): IDataSet = usingConnection { it.createDataSet(tableNames) }
+    fun createDataset(vararg tableNames: String): IDataSet = usingConnection { CachedDataSet(it.createDataSet(tableNames)) }
 
     /**
      * Select * from {name} and returns the result as an ITable for table assertions
