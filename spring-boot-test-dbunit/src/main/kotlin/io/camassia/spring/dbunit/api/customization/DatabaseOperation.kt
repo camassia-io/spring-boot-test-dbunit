@@ -2,6 +2,9 @@ package io.camassia.spring.dbunit.api.customization
 
 import org.dbunit.operation.DatabaseOperation as Delegate
 
+/**
+ * The underlying DatabaseOperation class cannot be used within annotations, hence this enum class.
+ */
 enum class DatabaseOperation(val underlying: Delegate) {
     UPDATE(Delegate.UPDATE),
     INSERT(Delegate.INSERT),

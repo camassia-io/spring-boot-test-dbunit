@@ -6,6 +6,8 @@ class Cell(
 ) {
     val value: Any? = value?.takeIf { it != "[null]" }
 
+    constructor(pair: Pair<String, Any>): this(pair.first, pair.second)
+
     operator fun component1() = key
     operator fun component2() = value
 }

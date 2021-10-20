@@ -109,11 +109,10 @@ open class DatabaseTester(
         val dataSet: IDataSet = files.map { file ->
             val underlying = dataSetLoader.loadDataSet(clazz, file.path) ?: throw AssertionError("Dataset [${file.path}] not found")
             if (defaults.isNotEmpty() || file.overrides.isNotEmpty()) {
+                val datasetTables = underlying.tableNames.map { it.toLowerCase() }.toSet()
+                val defaultOverrides: Set<Cell> = defaults.filterKeys { datasetTables.contains(it.toLowerCase()) }.values.flatMap { it.overrides }.toSet()
+                val testOverrides: Set<Cell> = file.overrides
                 ReplacementDataSet(underlying).also { ds ->
-                    val datasetTables = underlying.tableNames.map { it.toLowerCase() }.toSet()
-                    val defaultOverrides: Set<Cell> = defaults.filterKeys { datasetTables.contains(it.toLowerCase()) }.values.map { it.overrides }.flatten().toSet()
-                    val testOverrides: Set<Cell> = file.overrides
-
                     (defaultOverrides + testOverrides).forEach { (key, value) ->
                         ds.addReplacementObject(key, value)
                     }
