@@ -10,4 +10,7 @@ class Cell(
 
     operator fun component1() = key
     operator fun component2() = value
+    override fun toString(): String = "$key=$value"
+
+
 }

@@ -9,4 +9,6 @@ package io.camassia.spring.dbunit.api.dataset
 class Row(val cells: Map<String, Any>) {
     constructor(vararg cells: Pair<String, Any>) : this(cells.toMap())
     constructor(vararg cells: Cell) : this(cells.filter { it.value != null }.associate { (name, value) -> name to value!! })
+    override fun toString(): String = "Row(${cells.toList().joinToString(",") { (k, v) -> "$k=$v" }})"
+
 }
