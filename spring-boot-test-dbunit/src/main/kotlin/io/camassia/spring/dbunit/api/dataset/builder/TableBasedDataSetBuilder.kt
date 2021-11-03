@@ -41,10 +41,12 @@ internal class TableBasedDataSetBuilder(
             if(rows.isEmpty()) consumer.row(arrayOfNulls(columns.size))
             else rows.forEach { row ->
                 val cells: Array<out Any?> = columns
-                    .map { (n,v) -> Cell(n,v) }
-                    .map { cell ->
-                        if(row.cells.containsKey(cell.key)) row.cells[cell.key] else defaults.find { it.key == cell.key }
-                    }.toTypedArray()
+                    .map { (name: String, column: Column) -> Cell(name, column) }
+                    .map { cell: Cell ->
+                        if(row.cells.containsKey(cell.key)) row.cells[cell.key]
+                        else defaults.find { it.key == cell.key }?.value
+                    }
+                    .toTypedArray()
                 consumer.row(cells)
             }
 

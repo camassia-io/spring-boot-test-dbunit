@@ -3,6 +3,7 @@ package io.camassia.spring.dbunit
 import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
+import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.File
 import io.camassia.spring.dbunit.api.dataset.Row
@@ -235,6 +236,21 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result[1].component2()).isEqualTo("Test2")
             }
 
+            @Test
+            fun `should handle datasets with defaults`() {
+                dbunit.givenDataSet(
+                    Table(
+                        "demo1",
+                        Row(Cell("id", "1"))
+                    )
+                )
+
+                val result = selectAllFrom("demo1")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isEqualTo("default")
+            }
+
             @Nested
             inner class ShouldHandleMultipleDataSetUps {
 
@@ -370,5 +386,8 @@ class DatabaseTesterTest @Autowired constructor(
 
         @Bean
         fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
+
+        @Bean
+        fun tableDefault() = TableDefaults("demo1", Cell("name", "default"))
     }
 }
