@@ -18,6 +18,7 @@ import org.dbunit.dataset.CompositeDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
 import org.dbunit.dataset.ReplacementDataSet
+import org.dbunit.util.TableFormatter
 import kotlin.reflect.KClass
 
 /**
@@ -155,7 +156,24 @@ open class DatabaseTester(
     ) {
         setSetUpOperation(operation.underlying)
         setDataSet(dataSet)
-        onSetup()
+        try {
+            onSetup()
+        } catch (throwable: Throwable) {
+            val formatter = TableFormatter()
+            val builder = StringBuilder()
+            val iterator = dataSet.iterator()
+            while(iterator.next()) {
+                builder.append("\n")
+                builder.append(formatter.format(iterator.table))
+            }
+            throw DbUnitException(
+                """
+                |Could not load DataSet:
+                |$builder
+                """.trimMargin().trim(),
+                throwable
+            )
+        }
     }
 
     /**

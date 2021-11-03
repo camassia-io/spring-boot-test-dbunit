@@ -1,6 +1,7 @@
 package io.camassia.spring.dbunit
 
 import io.camassia.spring.dbunit.api.DatabaseTester
+import io.camassia.spring.dbunit.api.DbUnitException
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
 import io.camassia.spring.dbunit.api.customization.TableDefaults
@@ -9,6 +10,8 @@ import io.camassia.spring.dbunit.api.dataset.File
 import io.camassia.spring.dbunit.api.dataset.Row
 import io.camassia.spring.dbunit.api.dataset.Table
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.dbunit.dataset.NoSuchTableException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -304,6 +307,34 @@ class DatabaseTesterTest @Autowired constructor(
                     assertThat(result2[0].component2()).isEqualTo("Test2")
                 }
             }
+        }
+
+        @Test
+        fun shouldThrowUsefulExceptionOnFailure() {
+            assertThatThrownBy {
+                dbunit.givenDataSet(
+                    Table("other1", Row(Cell("ID", "Value"))),
+                    Table("other2", Row(Cell("ID", "Value"))),
+
+                )
+            }
+                .isInstanceOf(DbUnitException::class.java)
+                .hasMessage(
+                    """
+                    Could not load DataSet:
+                    
+                    ****** table: other1 ** row count: 1 ******
+                    ID                  |
+                    ====================|
+                    Value               |
+                    
+                    ****** table: other2 ** row count: 1 ******
+                    ID                  |
+                    ====================|
+                    Value               |
+                    """.trimIndent()
+                )
+                .hasCauseInstanceOf(NoSuchTableException::class.java)
         }
     }
 

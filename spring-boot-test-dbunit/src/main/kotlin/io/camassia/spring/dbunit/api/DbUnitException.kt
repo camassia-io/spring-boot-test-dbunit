@@ -1,3 +1,8 @@
 package io.camassia.spring.dbunit.api
 
-class DbUnitException(message: String): AssertionError(message)
+class DbUnitException: AssertionError {
+
+    constructor(message: String): super(message)
+    constructor(message: String, cause: Throwable): super(message, cause)
+
+}
