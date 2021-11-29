@@ -1,6 +1,7 @@
 package io.camassia.spring.dbunit.api.annotations
 
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
+import org.intellij.lang.annotations.Language
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
@@ -48,6 +49,7 @@ annotation class DatabaseTeardown(
      *
      * Note you can register a custom dataset loader to load from different locations, hide the file extension etc
      */
+    @Language("XML", prefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><dataset>", suffix = "</dataset>")
     val dataset: String = "",
 
     /**
