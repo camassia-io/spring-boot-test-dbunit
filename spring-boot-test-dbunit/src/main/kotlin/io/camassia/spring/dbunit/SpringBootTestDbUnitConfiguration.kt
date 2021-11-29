@@ -6,6 +6,7 @@ import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
 import io.camassia.spring.dbunit.api.dataset.DataSetParser
+import io.camassia.spring.dbunit.api.dataset.xml.XmlDataSetParser
 import io.camassia.spring.dbunit.api.dataset.xml.XmlLocalResourceDataSetLoader
 import org.dbunit.database.DatabaseConfig
 import org.springframework.beans.factory.annotation.Value
@@ -41,6 +42,15 @@ class SpringBootTestDbUnitConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun defaultDataSetLoader() = XmlLocalResourceDataSetLoader()
+
+    /**
+     * Used for modifying the way SpringDbUnit parses string datasets.
+     *
+     * The default bean treats them as XML.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    fun defaultDataSetParser() = XmlDataSetParser()
 
     /**
      * Used for modifying the underlying DatabaseTester
