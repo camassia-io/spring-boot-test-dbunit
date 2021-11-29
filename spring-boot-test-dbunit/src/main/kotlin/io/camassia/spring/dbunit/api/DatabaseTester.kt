@@ -6,6 +6,7 @@ import io.camassia.spring.dbunit.api.customization.DatabaseOperation
 import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
+import io.camassia.spring.dbunit.api.dataset.DataSetParser
 import io.camassia.spring.dbunit.api.dataset.File
 import io.camassia.spring.dbunit.api.dataset.Table
 import io.camassia.spring.dbunit.api.dataset.builder.TableBasedDataSetBuilder
@@ -29,6 +30,7 @@ open class DatabaseTester(
     private val config: DatabaseConfig,
     private val connectionModifier: ConnectionModifier,
     private val dataSetLoader: DataSetLoader,
+    private val dataSetParser: DataSetParser,
     schema: String? = null,
     defaults: List<TableDefaults> = emptyList()
 ) : AbstractDatabaseTester(schema) {
@@ -147,6 +149,40 @@ open class DatabaseTester(
     }
 
     /**
+     * Loads a DataSet from a String
+     */
+    @Suppress("UsePropertyAccessSyntax")
+    fun givenDataSet(
+        dataset: Array<String>,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(
+        dataset.map { dataSetParser.parseDataSet(it) }.toTypedArray(),
+        operation
+    )
+
+    @Suppress("UsePropertyAccessSyntax")
+    fun givenDataSet(
+        dataSet: Array<IDataSet>,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) {
+        val compositeDataSet: IDataSet = dataSet.map { underlying ->
+            if (defaults.isNotEmpty()) {
+                val datasetTables = underlying.tableNames.map { it.toLowerCase() }.toSet()
+                val defaultOverrides: Set<Cell> = defaults.filterKeys { datasetTables.contains(it.toLowerCase()) }.values.flatMap { it.overrides }.toSet()
+                ReplacementDataSet(underlying).also { ds ->
+                    (defaultOverrides).forEach { (key, value) ->
+                        ds.addReplacementObject(key, value)
+                    }
+                }
+            } else underlying
+        }.let {
+            if (it.size == 1) it.first()
+            else CompositeDataSet(it.toTypedArray())
+        }
+        givenDataSet(compositeDataSet, operation)
+    }
+
+    /**
      * Loads a DataSet
      */
     @Suppress("UsePropertyAccessSyntax")
@@ -162,7 +198,7 @@ open class DatabaseTester(
             val formatter = TableFormatter()
             val builder = StringBuilder()
             val iterator = dataSet.iterator()
-            while(iterator.next()) {
+            while (iterator.next()) {
                 builder.append("\n")
                 builder.append(formatter.format(iterator.table))
             }

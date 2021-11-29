@@ -158,6 +158,7 @@ class SomeTestClass @Autowired constructor(
 
 See:
 - DemoUsingAnnotations
+- DemoUsingAnnotationsAndStringDataSet
 - DemoUsingAnnotationsWithCustomDataSetLoader
 - DemoUsingTemplatedAnnotations
 - DemoUsingTemplatedAnnotationsAndDefaults
@@ -224,6 +225,86 @@ You can also set up Global Defaults so that you do not have to specify a value f
 
 See:
 - DemoUsingAnnotationsAndProgrammaticDataSet
+
+##### With String Based DataSets
+
+These by default will load XML you specify using the default DataSetParser.
+The file parser can be configured using Beans. See Customization below for more info.
+
+```kotlin
+@SpringBootTest(
+  classes = [
+      SomeTestClass.DemoTestConfiguration::class
+  ]
+)
+@AutoConfigureDbUnit
+class SomeTestClass @Autowired constructor(
+    private val dbUnit: DatabaseTester
+) {
+    
+    /*
+    You would likely replace this with a repository class which you are testing
+     */
+    @Autowired
+    private lateinit var jdbc: JdbcTemplate
+    
+    @BeforeEach
+    fun beforeEach() {
+        jdbc.execute("CREATE TABLE demo (id BIGINT NOT NULL, name VARCHAR(50) NOT NULL, CONSTRAINT demo_pk PRIMARY KEY (id))")
+    }
+    
+    @AfterEach
+    fun afterEach() {
+        jdbc.execute("DROP TABLE demo")
+    }
+
+    @Test
+    @DatabaseSetup(dataSet = """<demo id="123" name="test"/>""")
+    fun `repository should query successfully`() {
+        val result = repository.selectAll()
+        assertThat(result).hasSize(1)
+        assertThat(result[0].id).isEqualTo(123)
+        assertThat(result[0].name).isEqualTo("Test")
+    }
+    
+    /*
+    Configuration Class which sets up the minimum beans required to run this test.
+    If using
+     */
+    @TestConfiguration
+    class DemoTestConfiguration {
+
+        /*
+        This is the minimum connection config you need to provide to get Db Unit working
+         */
+        @Bean
+        fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
+
+        /*
+        This example uses an in memory H2 Database.
+        */
+        @Bean
+        fun dataSource(): DataSource = DataSourceBuilder
+            .create()
+            .driverClassName("org.h2.Driver")
+            .url("jdbc:h2:mem:dbunit")
+            .username("sa")
+            .password("sa")
+            .build()
+
+        /*
+        Used in the Test example to query the DB. 
+         */
+        @Bean
+        fun jdbc(ds: DataSource) = JdbcTemplate(ds)
+    }
+}
+```
+
+###### Useful Examples
+
+See:
+- DemoUsingAnnotationsAndStringDataSet
 
 #### Using `DatabaseTester` instead of annotations
 

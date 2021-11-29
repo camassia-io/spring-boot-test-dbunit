@@ -5,8 +5,10 @@ import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.DataSetLoader
+import io.camassia.spring.dbunit.api.dataset.DataSetParser
 import io.camassia.spring.dbunit.api.dataset.xml.XmlLocalResourceDataSetLoader
 import org.dbunit.database.DatabaseConfig
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -58,13 +60,16 @@ class SpringBootTestDbUnitConfiguration {
         config: DatabaseConfig,
         connectionModifier: ConnectionModifier,
         dataSetLoader: DataSetLoader,
+        dataSetParser: DataSetParser,
+        @Value("\${spring.dbunit.schema:#{null}}") schema: String?,
         defaults: List<TableDefaults>
     ): DatabaseTester = DatabaseTester(
         connectionSupplier,
         config,
         connectionModifier,
         dataSetLoader,
-        null,
+        dataSetParser,
+        schema,
         defaults
     )
 

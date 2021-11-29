@@ -26,7 +26,7 @@ annotation class DatabaseSetup(
     /**
      * A list of tables
      * DatabaseSetup(
-     *   Table(
+     *   tables = Table(
      *     "demo",
      *     Row(
      *       Cell("id", "123")
@@ -37,6 +37,18 @@ annotation class DatabaseSetup(
      * Note you can register a custom dataset loader to load from different locations, hide the file extension etc
      */
     val tables: Array<Table> = [],
+
+    /**
+     * An XML dataset
+     * DatabaseSetup(
+     *   dataset = """
+     *      <demo ID="123"/>
+     *   """
+     * )
+     *
+     * Note you can register a custom dataset loader to load from different locations, hide the file extension etc
+     */
+    val dataset: String = "",
 
     /**
      * The operation DB Unit should use when persisting this data set

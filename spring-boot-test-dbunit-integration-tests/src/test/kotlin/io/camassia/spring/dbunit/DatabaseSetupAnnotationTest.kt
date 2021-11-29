@@ -172,6 +172,58 @@ class DatabaseSetupAnnotationTest : RepositoryTest() {
     }
 
     @Nested
+    inner class WithStringDataSet {
+        @Test
+        @DatabaseSetup(dataset = """
+            <demo1 id="1" name="Test1"/>
+            <demo2 id="2" name="Test2"/>
+        """)
+        fun `should handle files with one row in multiple tables`() {
+            val result1 = selectAllFrom("demo1")
+            assertThat(result1).hasSize(1)
+            assertThat(result1[0].component1()).isEqualTo(1)
+            assertThat(result1[0].component2()).isEqualTo("Test1")
+
+            val result2 = selectAllFrom("demo2")
+            assertThat(result2).hasSize(1)
+            assertThat(result2[0].component1()).isEqualTo(2)
+            assertThat(result2[0].component2()).isEqualTo("Test2")
+        }
+
+        @Test
+        @DatabaseSetup(dataset = """
+            <demo1 id="1" name="Test1"/>
+            <demo1 id="2" name="Test2"/>
+        """)
+        fun `should handle files with multiple rows in one table`() {
+            val result = selectAllFrom("demo1")
+            assertThat(result).hasSize(2)
+            assertThat(result[0].component1()).isEqualTo(1)
+            assertThat(result[0].component2()).isEqualTo("Test1")
+            assertThat(result[1].component1()).isEqualTo(2)
+            assertThat(result[1].component2()).isEqualTo("Test2")
+        }
+
+        @Nested
+        @DatabaseSetup(dataset = """<demo1 id="1" name="Test1"/>""")
+        inner class ShouldHandleMultipleLevelsOfAnnotations {
+            @Test
+            @DatabaseSetup(dataset = """<demo2 id="2" name="Test2"/>""")
+            fun `when using inner classes`() {
+                val result1 = selectAllFrom("demo1")
+                assertThat(result1).hasSize(1)
+                assertThat(result1[0].component1()).isEqualTo(1)
+                assertThat(result1[0].component2()).isEqualTo("Test1")
+
+                val result2 = selectAllFrom("demo2")
+                assertThat(result2).hasSize(1)
+                assertThat(result2[0].component1()).isEqualTo(2)
+                assertThat(result2[0].component2()).isEqualTo("Test2")
+            }
+        }
+    }
+
+    @Nested
     inner class WithProgrammaticDataSet {
         @Test
         @DatabaseSetup(tables = [
