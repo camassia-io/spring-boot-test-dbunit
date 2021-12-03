@@ -39,14 +39,14 @@ class DemoUsingDatabaseTesterAndProgrammaticDataSet @Autowired constructor(
         dbUnit.givenDataSet(
             Table(
                 "demo",
-                Row(Cell("ID", "123"), Cell("NAME", "Test"))
+                Row(Cell("ID", "123"), Cell("NAME", "[null]"))
             )
         )
 
         val result = repository.selectAll()
         assertThat(result).hasSize(1)
         assertThat(result[0].id).isEqualTo(123)
-        assertThat(result[0].name).isEqualTo("Test")
+        assertThat(result[0].name).isNull()
     }
 
     @AfterEach

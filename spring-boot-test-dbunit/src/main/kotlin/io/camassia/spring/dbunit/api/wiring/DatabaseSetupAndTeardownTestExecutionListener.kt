@@ -56,8 +56,8 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
 
         annotations.forEach { annotation ->
             val files: List<File> = filenamesOf(annotation).map { File(it) }.takeIf { it.isNotEmpty() } ?: filesOf(annotation).map { it.toFile() }
-            val tables = tablesOf(annotation).map { it.toTable() }
-            val datasets = datasetsOf(annotation)
+            val tables: List<Table> = tablesOf(annotation).map { it.toTable() }
+            val datasets: Array<String> = datasetsOf(annotation)
             files.takeIf { it.isNotEmpty() }
                 ?.let {
                     val dbUnit = dbUnit()
@@ -89,7 +89,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
     private fun TableAnnotation.toTable() = Table(
         this.name,
         this.rows.map { row ->
-            Row(row.cells.associate { cell -> cell.name to cell.value })
+            Row(row.cells.map { Cell(it.name, it.value) })
         }
     )
 
