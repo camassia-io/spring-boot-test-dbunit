@@ -1,7 +1,6 @@
 package io.camassia.spring.dbunit.api
 
 import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
-import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
 import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.DataSetParser
@@ -28,7 +27,6 @@ import kotlin.reflect.KClass
 open class DatabaseTester(
     private val connectionSupplier: ConnectionSupplier,
     private val config: DatabaseConfig,
-    private val connectionModifier: ConnectionModifier,
     private val resourceLoader: ResourceLoader,
     private val dataSetParser: DataSetParser,
     private val extensions: Extensions,
@@ -237,6 +235,6 @@ open class DatabaseTester(
      */
     override fun getConnection(): IDatabaseConnection = DatabaseConnection(connectionSupplier.getConnection())
         .also { it.apply(config) }
-        .also { connectionModifier.modify(it) }
+        .also { connectionSupplier.afterCreation(it) }
 
 }
