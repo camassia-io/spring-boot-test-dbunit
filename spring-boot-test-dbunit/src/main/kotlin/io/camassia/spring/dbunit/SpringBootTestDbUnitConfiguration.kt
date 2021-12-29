@@ -4,10 +4,13 @@ import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.customization.TableDefaults
-import io.camassia.spring.dbunit.api.dataset.DataSetLoader
 import io.camassia.spring.dbunit.api.dataset.DataSetParser
 import io.camassia.spring.dbunit.api.dataset.xml.XmlDataSetParser
-import io.camassia.spring.dbunit.api.dataset.xml.XmlLocalResourceDataSetLoader
+import io.camassia.spring.dbunit.api.extensions.Extensions
+import io.camassia.spring.dbunit.api.extensions.NullCellMappingExtension
+import io.camassia.spring.dbunit.api.extensions.ResourceBasedValueCellMappingExtension
+import io.camassia.spring.dbunit.api.io.DefaultLocalResourceLoader
+import io.camassia.spring.dbunit.api.io.ResourceLoader
 import org.dbunit.database.DatabaseConfig
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -24,7 +27,7 @@ class SpringBootTestDbUnitConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    fun defaultDatabaseConfig() = DatabaseConfig()
+    fun defaultDatabaseConfig(): DatabaseConfig = DatabaseConfig()
 
     /**
      * Used for modifying the connection *after* the connection provider has supplied it.
@@ -32,16 +35,16 @@ class SpringBootTestDbUnitConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    fun defaultConnectionModifier() = ConnectionModifier { /* No-Op */ }
+    fun defaultConnectionModifier(): ConnectionModifier = ConnectionModifier { /* No-Op */ }
 
     /**
-     * Used for modifying the way SpringDbUnit loads dataset files.
+     * Used for modifying the way SpringDbUnit loads files.
      *
-     * The default bean loads XML files from src/main/resources.
+     * The default bean loads files from src/main/resources.
      */
     @Bean
     @ConditionalOnMissingBean
-    fun defaultDataSetLoader() = XmlLocalResourceDataSetLoader()
+    fun defaultResourceLoader(): ResourceLoader = DefaultLocalResourceLoader()
 
     /**
      * Used for modifying the way SpringDbUnit parses string datasets.
@@ -50,7 +53,23 @@ class SpringBootTestDbUnitConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    fun defaultDataSetParser() = XmlDataSetParser()
+    fun defaultDataSetParser(): DataSetParser = XmlDataSetParser()
+
+    /**
+     * Configurable extensions e.g. Mapping values of cells
+     * The order here is important
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    fun extensions(
+        resourceLoader: ResourceLoader, defaults: List<TableDefaults>
+    ): Extensions = Extensions(
+        listOf(
+            NullCellMappingExtension,
+            ResourceBasedValueCellMappingExtension(resourceLoader)
+        ),
+        defaults
+    )
 
     /**
      * Used for modifying the underlying DatabaseTester
@@ -69,18 +88,18 @@ class SpringBootTestDbUnitConfiguration {
         connectionSupplier: ConnectionSupplier,
         config: DatabaseConfig,
         connectionModifier: ConnectionModifier,
-        dataSetLoader: DataSetLoader,
+        resourceLoader: ResourceLoader,
         dataSetParser: DataSetParser,
-        @Value("\${spring.dbunit.schema:#{null}}") schema: String?,
-        defaults: List<TableDefaults>
+        extensions: Extensions,
+        @Value("\${spring.dbunit.schema:#{null}}") schema: String?
     ): DatabaseTester = DatabaseTester(
         connectionSupplier,
         config,
         connectionModifier,
-        dataSetLoader,
+        resourceLoader,
         dataSetParser,
-        schema,
-        defaults
+        extensions,
+        schema
     )
 
 }

@@ -254,6 +254,36 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result[0].component2()).isEqualTo("default")
             }
 
+            @Test
+            fun `should handle datasets with nulls`() {
+                dbunit.givenDataSet(
+                    Table(
+                        "demo1",
+                        Row(Cell("id", "1"), Cell("name", "[null]"))
+                    )
+                )
+
+                val result = selectAllFrom("demo1")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isNull()
+            }
+
+            @Test
+            fun `should handle datasets with file cell`() {
+                dbunit.givenDataSet(
+                    Table(
+                        "demo1",
+                        Row(Cell("id", "1"), Cell("name", "[file:/long-value.txt]"))
+                    )
+                )
+
+                val result = selectAllFrom("demo1")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isEqualTo("long-value")
+            }
+
             @Nested
             inner class ShouldHandleMultipleDataSetUps {
 

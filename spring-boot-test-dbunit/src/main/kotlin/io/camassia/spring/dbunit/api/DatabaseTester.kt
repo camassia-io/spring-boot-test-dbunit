@@ -3,13 +3,13 @@ package io.camassia.spring.dbunit.api
 import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.ConnectionModifier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
-import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.Cell
-import io.camassia.spring.dbunit.api.dataset.DataSetLoader
 import io.camassia.spring.dbunit.api.dataset.DataSetParser
 import io.camassia.spring.dbunit.api.dataset.File
 import io.camassia.spring.dbunit.api.dataset.Table
 import io.camassia.spring.dbunit.api.dataset.builder.TableBasedDataSetBuilder
+import io.camassia.spring.dbunit.api.extensions.Extensions
+import io.camassia.spring.dbunit.api.io.ResourceLoader
 import org.dbunit.AbstractDatabaseTester
 import org.dbunit.database.DatabaseConfig
 import org.dbunit.database.DatabaseConnection
@@ -29,13 +29,13 @@ open class DatabaseTester(
     private val connectionSupplier: ConnectionSupplier,
     private val config: DatabaseConfig,
     private val connectionModifier: ConnectionModifier,
-    private val dataSetLoader: DataSetLoader,
+    private val resourceLoader: ResourceLoader,
     private val dataSetParser: DataSetParser,
-    schema: String? = null,
-    defaults: List<TableDefaults> = emptyList()
+    private val extensions: Extensions,
+    schema: String? = null
 ) : AbstractDatabaseTester(schema) {
 
-    private val defaults = defaults.associateBy { it.table }
+    private val dataSetBuilder = TableBasedDataSetBuilder(extensions)
 
     /**
      * Safe way of using a connection & then freeing it back up again after your work is done
@@ -110,10 +110,11 @@ open class DatabaseTester(
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
         val dataSet: IDataSet = files.map { file ->
-            val underlying = dataSetLoader.loadDataSet(clazz, file.path) ?: throw AssertionError("Dataset [${file.path}] not found")
-            if (defaults.isNotEmpty() || file.overrides.isNotEmpty()) {
+            val underlying = resourceLoader.getResourceInputStream(clazz, file.path).let { dataSetParser.parseDataSet(it) }
+            if (file.overrides.isNotEmpty()) {
                 val datasetTables = underlying.tableNames.map { it.toLowerCase() }.toSet()
-                val defaultOverrides: Set<Cell> = defaults.filterKeys { datasetTables.contains(it.toLowerCase()) }.values.flatMap { it.overrides }.toSet()
+                // Templated files require Defaults to be handled at a higher level
+                val defaultOverrides: Set<Cell> = extensions.defaults(datasetTables)
                 val testOverrides: Set<Cell> = file.overrides
                 ReplacementDataSet(underlying).also { ds ->
                     (defaultOverrides + testOverrides).forEach { (key, value) ->
@@ -144,7 +145,7 @@ open class DatabaseTester(
         tables: Collection<Table>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
-        val dataSet: IDataSet = TableBasedDataSetBuilder(tables, defaults.values).build()
+        val dataSet: IDataSet = dataSetBuilder.build(tables)
         givenDataSet(dataSet, operation)
     }
 
@@ -165,20 +166,7 @@ open class DatabaseTester(
         dataSet: Array<IDataSet>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
-        val compositeDataSet: IDataSet = dataSet.map { underlying ->
-            if (defaults.isNotEmpty()) {
-                val datasetTables = underlying.tableNames.map { it.toLowerCase() }.toSet()
-                val defaultOverrides: Set<Cell> = defaults.filterKeys { datasetTables.contains(it.toLowerCase()) }.values.flatMap { it.overrides }.toSet()
-                ReplacementDataSet(underlying).also { ds ->
-                    (defaultOverrides).forEach { (key, value) ->
-                        ds.addReplacementObject(key, value)
-                    }
-                }
-            } else underlying
-        }.let {
-            if (it.size == 1) it.first()
-            else CompositeDataSet(it.toTypedArray())
-        }
+        val compositeDataSet = if (dataSet.size == 1) dataSet.first() else CompositeDataSet(dataSet)
         givenDataSet(compositeDataSet, operation)
     }
 
@@ -191,7 +179,7 @@ open class DatabaseTester(
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
         setSetUpOperation(operation.underlying)
-        setDataSet(dataSet)
+        setDataSet(dataSetBuilder.applyExtensions(dataSet))
         try {
             onSetup()
         } catch (throwable: Throwable) {

@@ -4,9 +4,8 @@ import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
 import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
-import io.camassia.spring.dbunit.api.dataset.xml.XmlLocalResourceDataSetLoader
+import io.camassia.spring.dbunit.api.io.DefaultLocalResourceLoader
 import org.assertj.core.api.Assertions.assertThat
-import org.dbunit.dataset.IDataSet
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.jdbc.core.JdbcTemplate
+import java.io.InputStream
+import java.net.URL
 import javax.sql.DataSource
 
 /**
@@ -74,10 +75,9 @@ class DemoUsingAnnotationsWithCustomDataSetLoader @Autowired constructor(
         fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
 
         @Bean
-        fun dataSetLoader() = object : XmlLocalResourceDataSetLoader() {
-            override fun loadDataSet(clazz: Class<*>, location: String): IDataSet? {
-                return super.loadDataSet(clazz, "/${location}.xml")
-            }
+        fun resourceLoader() = object : DefaultLocalResourceLoader() {
+            override fun getResourceUrl(clazz: Class<*>, path: String): URL = super.getResourceUrl(clazz, "/${path}.xml")
+            override fun getResourceInputStream(clazz: Class<*>, path: String): InputStream = super.getResourceInputStream(clazz, "/${path}.xml")
         }
     }
 }

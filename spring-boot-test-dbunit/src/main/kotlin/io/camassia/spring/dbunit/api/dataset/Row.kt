@@ -6,12 +6,14 @@ package io.camassia.spring.dbunit.api.dataset
  * @param cells A map of column names to values
  * @see Table
  */
-class Row(cells: Collection<Cell>) {
+class Row(val cells: Collection<Cell>) {
 
-    val cells: Map<String, Any?> = cells.associateBy({ it.key }, { it.value })
+    fun toMap(): Map<String, Any?> = cells.associateBy({ it.key }, { it.value })
 
     constructor(vararg cells: Pair<String, Any?>) : this(cells.map { Cell(it.first, it.second) })
     constructor(vararg cells: Cell) : this(cells.toSet())
+
+    fun mapCells(fn: (Cell) -> Cell) = Row(cells.map(fn))
 
     override fun toString(): String = "Row(${cells.toList().joinToString(",") { (k, v) -> "$k=$v" }})"
 

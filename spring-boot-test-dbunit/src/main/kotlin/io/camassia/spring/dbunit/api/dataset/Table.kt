@@ -10,6 +10,8 @@ package io.camassia.spring.dbunit.api.dataset
 class Table(val name: String, val rows: Collection<Row>) {
     constructor(name: String, vararg rows: Row) : this(name, rows.toList())
 
+    fun mapRows(fn: (Row) -> Row) = Table(name, rows.map(fn))
+
     override fun toString(): String = (
             """
             |Table(
