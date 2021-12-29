@@ -157,12 +157,12 @@ class SomeTestClass @Autowired constructor(
 ###### Useful Examples
 
 See:
-- DemoUsingAnnotations
-- DemoUsingAnnotationsAndStringDataSet
-- DemoUsingAnnotationsWithCustomDataSetLoader
-- DemoUsingTemplatedAnnotations
-- DemoUsingTemplatedAnnotationsAndDefaults
-- DemoUsingAnnotationsAndProgrammaticDataSet
+- [DemoUsingAnnotations](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingAnnotations.kt)
+- [DemoUsingAnnotationsAndStringDataSet](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingAnnotationsAndStringDataSet.kt)
+- [DemoUsingAnnotationsWithCustomDataSetLoader](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingAnnotationsWithCustomDataSetLoader.kt)
+- [DemoUsingTemplatedAnnotations](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedAnnotations.kt)
+- [DemoUsingTemplatedAnnotationsAndDefaults](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedAnnotationsAndDefaults.kt)
+- [DemoUsingAnnotationsAndProgrammaticDataSet](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingAnnotationsAndProgrammaticDataSet.kt)
 
 ##### With Templated File Based DataSets
 
@@ -197,10 +197,10 @@ You can also set up Global Defaults so that you do not have to specify a value f
 ###### Useful Examples
 
 See:
-- DemoUsingTemplatedAnnotations
-- DemoUsingTemplatedAnnotationsAndDefaults
-- DemoUsingTemplatedDatabaseTester
-- DemoUsingTemplatedDatabaseTesterAndDefaults
+- [DemoUsingTemplatedAnnotations](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedAnnotations.kt)
+- [DemoUsingTemplatedAnnotationsAndDefaults](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedAnnotationsAndDefaults.kt)
+- [DemoUsingTemplatedDatabaseTester](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedDatabaseTester.kt)
+- [DemoUsingTemplatedDatabaseTesterAndDefaults](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedDatabaseTesterAndDefaults.kt)
 
 ##### With Programmatic DataSets
 
@@ -224,7 +224,7 @@ You can also set up Global Defaults so that you do not have to specify a value f
 ###### Useful Examples
 
 See:
-- DemoUsingAnnotationsAndProgrammaticDataSet
+- [DemoUsingAnnotationsAndProgrammaticDataSet](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingAnnotationsAndProgrammaticDataSet.kt)
 
 ##### With String Based DataSets
 
@@ -304,7 +304,7 @@ class SomeTestClass @Autowired constructor(
 ###### Useful Examples
 
 See:
-- DemoUsingAnnotationsAndStringDataSet
+- [DemoUsingAnnotationsAndStringDataSet](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingAnnotationsAndStringDataSet.kt)
 
 #### Using `DatabaseTester` instead of annotations
 
@@ -394,9 +394,9 @@ You can also set up Global Defaults so that you do not have to specify a value f
 ###### Useful Examples
 
 See:
-- DemoUsingDatabaseTester
-- DemoUsingTemplatedDatabaseTester
-- DemoUsingTemplatedDatabaseTesterAndDefaults
+- [DemoUsingDatabaseTester](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingDatabaseTester.kt)
+- [DemoUsingTemplatedDatabaseTester](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedDatabaseTester.kt)
+- [DemoUsingTemplatedDatabaseTesterAndDefaults](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedDatabaseTesterAndDefaults.kt)
 
 Notes:
 
@@ -414,10 +414,12 @@ You can register a bean of each type in your configuration classes to customize 
 
 You can use this to:
 
-- Add DatabaseConfig
-- Change the DataSetLoader from the default XmlLocalResourceDataSetLoader
-- Modify the Database Connection DBUnit uses
+- Add `DatabaseConfig`
+- Change the `ResourceLoader` from the default file based loader
+- Modify the Database Connection DBUnit uses (see `ConnectionSupplier` `afterCreation`)
 - [Add Table Column Value Defaults](https://github.com/camassia-io/spring-boot-test-dbunit#global-defaults-for-each-table)
+
+See `SpringBootTestDbUnitConfiguration` for existing defaults that are in use
   
 Note there is a known bug which means all `Bean`s you create to customize the config need to be annotated with `@Primary`
 
