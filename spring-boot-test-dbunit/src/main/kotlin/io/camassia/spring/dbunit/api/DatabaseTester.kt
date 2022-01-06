@@ -2,7 +2,6 @@ package io.camassia.spring.dbunit.api
 
 import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
-import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.DataSetParser
 import io.camassia.spring.dbunit.api.dataset.File
 import io.camassia.spring.dbunit.api.dataset.Table
@@ -14,10 +13,8 @@ import org.dbunit.database.DatabaseConfig
 import org.dbunit.database.DatabaseConnection
 import org.dbunit.database.IDatabaseConnection
 import org.dbunit.dataset.CachedDataSet
-import org.dbunit.dataset.CompositeDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
-import org.dbunit.dataset.ReplacementDataSet
 import org.dbunit.util.TableFormatter
 import kotlin.reflect.KClass
 
@@ -29,11 +26,14 @@ open class DatabaseTester(
     private val config: DatabaseConfig,
     private val resourceLoader: ResourceLoader,
     private val dataSetParser: DataSetParser,
-    private val extensions: Extensions,
+    extensions: Extensions,
     schema: String? = null
 ) : AbstractDatabaseTester(schema) {
 
-    private val dataSetBuilder = TableBasedDataSetBuilder(extensions)
+    private val dataSetBuilder = TableBasedDataSetBuilder(
+        extensions,
+        config.getProperty(DatabaseConfig.FEATURE_CASE_SENSITIVE_TABLE_NAMES) as Boolean
+    )
 
     /**
      * Safe way of using a connection & then freeing it back up again after your work is done
@@ -107,24 +107,10 @@ open class DatabaseTester(
         files: Collection<File>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
-        val dataSet: IDataSet = files.map { file ->
-            val underlying = resourceLoader.getResourceInputStream(clazz, file.path).let { dataSetParser.parseDataSet(it) }
-            if (file.overrides.isNotEmpty()) {
-                val datasetTables = underlying.tableNames.map { it.toLowerCase() }.toSet()
-                // Templated files require Defaults to be handled at a higher level
-                val defaultOverrides: Set<Cell> = extensions.defaults(datasetTables)
-                val testOverrides: Set<Cell> = file.overrides
-                ReplacementDataSet(underlying).also { ds ->
-                    (defaultOverrides + testOverrides).forEach { (key, value) ->
-                        ds.addReplacementObject(key, value)
-                    }
-                }
-            } else underlying
-        }.let {
-            if (it.size == 1) it.first()
-            else CompositeDataSet(it.toTypedArray())
+        val dataSets: Map<IDataSet, Map<String, Any?>> = files.associate { file ->
+            resourceLoader.getResourceInputStream(clazz, file.path).let { dataSetParser.parseDataSet(it) } to file.overrides.associateBy({ it.key }, { it.value })
         }
-        givenDataSet(dataSet, operation)
+        givenDataSet(dataSets, operation)
     }
 
     /**
@@ -143,8 +129,8 @@ open class DatabaseTester(
         tables: Collection<Table>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
-        val dataSet: IDataSet = dataSetBuilder.build(tables)
-        givenDataSet(dataSet, operation)
+        val dataSet: IDataSet = dataSetBuilder.build(tables, emptyMap())
+        givenDataSet(dataSet, emptyMap(), operation)
     }
 
     /**
@@ -159,31 +145,42 @@ open class DatabaseTester(
         operation
     )
 
-    @Suppress("UsePropertyAccessSyntax")
-    fun givenDataSet(
-        dataSet: Array<IDataSet>,
-        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
-    ) {
-        val compositeDataSet = if (dataSet.size == 1) dataSet.first() else CompositeDataSet(dataSet)
-        givenDataSet(compositeDataSet, operation)
-    }
-
     /**
      * Loads a DataSet
      */
     @Suppress("UsePropertyAccessSyntax")
     fun givenDataSet(
+        dataSet: Array<IDataSet>,
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(dataSet.associateWith { emptyMap() }, operation)
+
+    /**
+     * Loads a DataSet with overrides
+     */
+    @Suppress("UsePropertyAccessSyntax")
+    fun givenDataSet(
         dataSet: IDataSet,
+        overrides: Map<String, Any?> = emptyMap(),
+        operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
+    ) = givenDataSet(mapOf(dataSet to overrides), operation)
+
+    /**
+     * Loads DataSets with overrides
+     */
+    @Suppress("UsePropertyAccessSyntax")
+    fun givenDataSet(
+        dataSets: Map<IDataSet, Map<String, Any?>>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
         setSetUpOperation(operation.underlying)
-        setDataSet(dataSetBuilder.applyExtensions(dataSet))
+        val compositeDataSet = dataSetBuilder.joinAndApplyExtensions(dataSets)
+        setDataSet(compositeDataSet)
         try {
             onSetup()
         } catch (throwable: Throwable) {
             val formatter = TableFormatter()
             val builder = StringBuilder()
-            val iterator = dataSet.iterator()
+            val iterator = compositeDataSet.iterator()
             while (iterator.next()) {
                 builder.append("\n")
                 builder.append(formatter.format(iterator.table))

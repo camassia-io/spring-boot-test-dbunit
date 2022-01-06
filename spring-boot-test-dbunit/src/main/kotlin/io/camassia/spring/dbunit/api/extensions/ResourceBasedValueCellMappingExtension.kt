@@ -11,7 +11,7 @@ class ResourceBasedValueCellMappingExtension(
     private val resourceLoader: ResourceLoader
 ) : CellMappingExtension {
 
-    override fun applyTo(table: String, cell: Cell): Cell {
+    override fun applyTo(table: String, cell: Cell, overrides: Map<String, Any?>): Cell {
         val value = cell.value
 
         return if (value != null && value is String && value.startsWith("[file:") && value.endsWith("]")) {

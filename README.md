@@ -183,14 +183,13 @@ You can override these templated values using `@DatabaseSetup(files = [...])` / 
         File(
             "/TemplatedDemo.xml", 
             Cell("[ID]", "123"), // Overrides value "[ID]" in TemplatedDemo.xml with 123
-            Cell("[NAME]", "[null]") // Overrides value "[ID]" in TemplatedDemo.xml with null
+            Cell("[NAME]", "[null]") // Overrides value "[NAME]" in TemplatedDemo.xml with null
         )
     ]
 )
 ```
 
-Note that due to how DbUnits replacement dataset works, you have to reference overrides by the value, not the column name.
-As a result, it's good practice to use brackets, or some other kind of indicator to make it obvious what columns should be overridden, the example above uses square brackets for this purpose.
+Note that template replacements are done by value, not by column name. All template keys should be within square brackets.
 
 You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Setting Global Defaults](https://github.com/camassia-io/spring-boot-test-dbunit#global-defaults-for-each-table) for more info.
 
@@ -418,6 +417,7 @@ You can use this to:
 - Change the `ResourceLoader` from the default file based loader
 - Modify the Database Connection DBUnit uses (see `ConnectionSupplier` `afterCreation`)
 - [Add Table Column Value Defaults](https://github.com/camassia-io/spring-boot-test-dbunit#global-defaults-for-each-table)
+- Add/remove extensions that DbUnit uses to manage custom handling for mapping cell values. E.g if you wanted to do something like mapping `"[pi]"` to a numerical number for pi.
 
 See `SpringBootTestDbUnitConfiguration` for existing defaults that are in use
   

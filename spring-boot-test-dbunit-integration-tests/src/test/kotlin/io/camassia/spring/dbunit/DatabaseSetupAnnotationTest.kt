@@ -7,6 +7,7 @@ import io.camassia.spring.dbunit.api.annotations.Row
 import io.camassia.spring.dbunit.api.annotations.Table
 import io.camassia.spring.dbunit.api.connection.DataSourceConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
+import io.camassia.spring.dbunit.api.customization.TableDefaults
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -65,6 +66,15 @@ class DatabaseSetupAnnotationTest : RepositoryTest() {
             assertThat(result2).hasSize(1)
             assertThat(result2[0].component1()).isEqualTo(2)
             assertThat(result2[0].component2()).isEqualTo("Test2")
+        }
+
+        @Test
+        @DatabaseSetup("/Demo-WithDefaults.xml")
+        fun `should use defaults for missing fields`() {
+            val result = selectAllFrom("demo1")
+            assertThat(result).hasSize(1)
+            assertThat(result[0].component1()).isEqualTo(1)
+            assertThat(result[0].component2()).isEqualTo("default-name")
         }
 
         @Nested
@@ -144,6 +154,19 @@ class DatabaseSetupAnnotationTest : RepositoryTest() {
             assertThat(result2[0].component2()).isEqualTo("Test2")
         }
 
+        @Test
+        @DatabaseSetup(files = [
+            File("/TemplatedDemo-WithDefaults.xml",
+                Cell("[ID]", "1")
+            )
+        ])
+        fun `should use defaults for missing fields`() {
+            val result = selectAllFrom("demo1")
+            assertThat(result).hasSize(1)
+            assertThat(result[0].component1()).isEqualTo(1)
+            assertThat(result[0].component2()).isEqualTo("default-name")
+        }
+
         @Nested
         @DatabaseSetup(files = [
             File("/TemplatedDemo1.xml",
@@ -204,6 +227,17 @@ class DatabaseSetupAnnotationTest : RepositoryTest() {
             assertThat(result[1].component2()).isEqualTo("Test2")
         }
 
+        @Test
+        @DatabaseSetup(dataset = """
+            <demo1 id="1"/>
+        """)
+        fun `should use defaults for missing fields`() {
+            val result = selectAllFrom("demo1")
+            assertThat(result).hasSize(1)
+            assertThat(result[0].component1()).isEqualTo(1)
+            assertThat(result[0].component2()).isEqualTo("default-name")
+        }
+
         @Nested
         @DatabaseSetup(dataset = """<demo1 id="1" name="Test1"/>""")
         inner class ShouldHandleMultipleLevelsOfAnnotations {
@@ -260,6 +294,19 @@ class DatabaseSetupAnnotationTest : RepositoryTest() {
             assertThat(result[0].component2()).isEqualTo("Test1")
             assertThat(result[1].component1()).isEqualTo(2)
             assertThat(result[1].component2()).isEqualTo("Test2")
+        }
+
+        @Test
+        @DatabaseSetup(tables = [
+            Table("demo1",
+                Row(Cell("id", "1"))
+            )
+        ])
+        fun `should use defaults for missing fields`() {
+            val result = selectAllFrom("demo1")
+            assertThat(result).hasSize(1)
+            assertThat(result[0].component1()).isEqualTo(1)
+            assertThat(result[0].component2()).isEqualTo("default-name")
         }
 
         @Nested
@@ -322,5 +369,8 @@ class DatabaseSetupAnnotationTest : RepositoryTest() {
 
         @Bean
         fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
+
+        @Bean
+        fun defaults() = TableDefaults("demo1", io.camassia.spring.dbunit.api.dataset.Cell("name", "default-name"))
     }
 }

@@ -20,16 +20,16 @@ internal class ResourceBasedValueCellMappingExtensionTest {
 
     @Test
     fun shouldMapFilenames() {
-        assertThat(extension.applyTo(table, Cell("key", "[file:abc.txt]"))).isEqualTo(Cell("key", "content"))
-        assertThat(extension.applyTo(table, Cell("key", "[file:/abc.json]"))).isEqualTo(Cell("key", "content"))
-        assertThat(extension.applyTo(table, Cell("key", "[file:abc-123.json]"))).isEqualTo(Cell("key", "content"))
-        assertThat(extension.applyTo(table, Cell("key", "[file:abc_123.xml]"))).isEqualTo(Cell("key", "content"))
+        assertThat(extension.applyTo(table, Cell("key", "[file:abc.txt]"), emptyMap())).isEqualTo(Cell("key", "content"))
+        assertThat(extension.applyTo(table, Cell("key", "[file:/abc.json]"), emptyMap())).isEqualTo(Cell("key", "content"))
+        assertThat(extension.applyTo(table, Cell("key", "[file:abc-123.json]"), emptyMap())).isEqualTo(Cell("key", "content"))
+        assertThat(extension.applyTo(table, Cell("key", "[file:abc_123.xml]"), emptyMap())).isEqualTo(Cell("key", "content"))
     }
 
     @Test
     fun shouldNotMapOtherValues() {
-        assertThat(extension.applyTo(table, Cell("key", "[null]"))).isEqualTo(Cell("key", "[null]"))
-        assertThat(extension.applyTo(table, Cell("key", "other"))).isEqualTo(Cell("key", "other"))
-        assertThat(extension.applyTo(table, Cell("key", "other.txt"))).isEqualTo(Cell("key", "other.txt"))
+        assertThat(extension.applyTo(table, Cell("key", "[null]"), emptyMap())).isEqualTo(Cell("key", "[null]"))
+        assertThat(extension.applyTo(table, Cell("key", "other"), emptyMap())).isEqualTo(Cell("key", "other"))
+        assertThat(extension.applyTo(table, Cell("key", "other.txt"), emptyMap())).isEqualTo(Cell("key", "other.txt"))
     }
 }

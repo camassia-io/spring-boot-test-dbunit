@@ -38,7 +38,7 @@ class DemoUsingTemplatedDatabaseTesterAndDefaults @Autowired constructor(
     fun `should query repository successfully`() {
         dbUnit.givenDataSet(
             DemoUsingTemplatedDatabaseTesterAndDefaults::class.java,
-            File("/TemplatedDemo.xml", Cell("[ID]", 123))
+            File("/TemplatedDemoWithDefaults.xml", Cell("[ID]", 123))
         )
 
         val result = repository.selectAll()
@@ -71,6 +71,6 @@ class DemoUsingTemplatedDatabaseTesterAndDefaults @Autowired constructor(
         fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
 
         @Bean
-        fun demoDefaults() = TableDefaults("demo", Cell("[NAME]", "Test"))
+        fun demoDefaults() = TableDefaults("demo", Cell("NAME", "Test"))
     }
 }

@@ -353,12 +353,12 @@ class DatabaseTesterTest @Autowired constructor(
                     """
                     Could not load DataSet:
                     
-                    ****** table: other1 ** row count: 1 ******
+                    ****** table: OTHER1 ** row count: 1 ******
                     ID                  |
                     ====================|
                     Value               |
                     
-                    ****** table: other2 ** row count: 1 ******
+                    ****** table: OTHER2 ** row count: 1 ******
                     ID                  |
                     ====================|
                     Value               |

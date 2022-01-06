@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <!--
+    Note, In this example, to make it clear which fields are templated the value to replace is within square brackets.
+    The name field has been omitted and will be handled by defaults.
+    -->
+    <demo id="[ID]"/>
+</dataset>

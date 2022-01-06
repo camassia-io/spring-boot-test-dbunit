@@ -6,6 +6,8 @@ import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.DataSetParser
 import io.camassia.spring.dbunit.api.dataset.xml.XmlDataSetParser
 import io.camassia.spring.dbunit.api.extensions.Extensions
+import io.camassia.spring.dbunit.api.extensions.FinalTemplatedCellMappingExtension
+import io.camassia.spring.dbunit.api.extensions.InitialTemplatedCellMappingExtension
 import io.camassia.spring.dbunit.api.extensions.NullCellMappingExtension
 import io.camassia.spring.dbunit.api.extensions.ResourceBasedValueCellMappingExtension
 import io.camassia.spring.dbunit.api.io.DefaultLocalResourceLoader
@@ -56,8 +58,14 @@ class SpringBootTestDbUnitConfiguration {
         resourceLoader: ResourceLoader, defaults: List<TableDefaults>
     ): Extensions = Extensions(
         listOf(
+            // Resolves all known templates and ignores unknowns for further processing
+            InitialTemplatedCellMappingExtension,
+            // Replaces all [null]s will null
             NullCellMappingExtension,
-            ResourceBasedValueCellMappingExtension(resourceLoader)
+            // Resolves all file replacements
+            ResourceBasedValueCellMappingExtension(resourceLoader),
+            // Resolves all remaining templates and nulls any leftover
+            FinalTemplatedCellMappingExtension
         ),
         defaults
     )

@@ -38,7 +38,7 @@ class DemoUsingTemplatedAnnotationsAndDefaults @Autowired constructor(
 
     @Test
     @DatabaseSetup(
-        files = [File("/TemplatedDemo.xml", Cell("[ID]", "123"))]
+        files = [File("/TemplatedDemoWithDefaults.xml", Cell("[ID]", "123"))]
     )
     @DatabaseTeardown(
         files = [File("/Empty.xml")]
@@ -76,7 +76,7 @@ class DemoUsingTemplatedAnnotationsAndDefaults @Autowired constructor(
         @Bean
         fun demoDefaults() = TableDefaults(
             "demo",
-            "[NAME]" to "Test"
+            "NAME" to "Test"
         )
     }
 }
