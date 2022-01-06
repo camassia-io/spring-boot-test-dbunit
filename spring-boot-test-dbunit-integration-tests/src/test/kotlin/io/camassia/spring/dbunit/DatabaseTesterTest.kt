@@ -95,6 +95,16 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result2[0].component1()).isEqualTo(2)
                 assertThat(result2[0].component2()).isEqualTo("Test2")
             }
+
+            @Test
+            fun `should use defaults for missing fields`() {
+                dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo-WithDefaults.xml")
+
+                val result = selectAllFrom("demo1")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isEqualTo("default")
+            }
         }
 
         @Nested
@@ -193,6 +203,22 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result2[0].component2()).isEqualTo("Test2")
             }
 
+            @Test
+            fun `should use defaults for missing fields`() {
+                dbunit.givenDataSet(
+                    DatabaseTesterTest::class,
+                    File(
+                        "/TemplatedDemo-WithDefaults.xml",
+                        Cell("[ID]", "1")
+                    )
+                )
+
+                val result = selectAllFrom("demo1")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isEqualTo("default")
+            }
+
         }
 
         @Nested
@@ -240,7 +266,7 @@ class DatabaseTesterTest @Autowired constructor(
             }
 
             @Test
-            fun `should handle datasets with defaults`() {
+            fun `should use defaults for missing fields`() {
                 dbunit.givenDataSet(
                     Table(
                         "demo1",
