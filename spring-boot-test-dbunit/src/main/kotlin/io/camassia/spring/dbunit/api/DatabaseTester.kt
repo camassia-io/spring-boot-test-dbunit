@@ -32,7 +32,7 @@ open class DatabaseTester(
 
     private val dataSetBuilder = TableBasedDataSetBuilder(
         extensions,
-        config.getProperty(DatabaseConfig.FEATURE_CASE_SENSITIVE_TABLE_NAMES) as Boolean
+        !(config.getProperty(DatabaseConfig.FEATURE_CASE_SENSITIVE_TABLE_NAMES) as Boolean)
     )
 
     /**

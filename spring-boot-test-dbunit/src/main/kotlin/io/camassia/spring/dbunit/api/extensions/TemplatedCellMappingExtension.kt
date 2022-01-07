@@ -33,7 +33,7 @@ object FinalTemplatedCellMappingExtension : CellMappingExtension {
         return if (value != null && value is String && value.startsWith('[') && value.endsWith(']')) {
             cell.mapValue {
                 overrides[value] ?: throw DbUnitException(
-                    "Expected an Override for $value but there wasn't one configured. Overrides available were: [${overrides.entries.joinToString { (k, v) -> "$k=$v" }}]"
+                    "Expected an Override for $value but there wasn't one configured. Overrides available were: ${overrides.entries.joinToString { (k, v) -> "$k=$v" }}"
                 )
             }
         } else cell
