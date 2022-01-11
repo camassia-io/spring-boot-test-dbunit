@@ -105,6 +105,16 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result[0].component1()).isEqualTo(1)
                 assertThat(result[0].component2()).isEqualTo("default")
             }
+
+            @Test
+            fun `should replace special file params`() {
+                dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo-WithFile.xml")
+
+                val result = selectAllFrom("demo1")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isEqualTo("long-value")
+            }
         }
 
         @Nested
@@ -233,6 +243,23 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result).hasSize(1)
                 assertThat(result[0].component1()).isEqualTo(1)
                 assertThat(result[0].component2()).isEqualTo("default")
+            }
+
+            @Test
+            fun `should replace special file params`() {
+                dbunit.givenDataSet(
+                    DatabaseTesterTest::class,
+                    File(
+                        "/TemplatedDemo1.xml",
+                        Cell("[ID]", "1"),
+                        Cell("[NAME]", "[file:/long-value.txt]"),
+                    )
+                )
+
+                val result = selectAllFrom("demo1")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isEqualTo("long-value")
             }
         }
 
