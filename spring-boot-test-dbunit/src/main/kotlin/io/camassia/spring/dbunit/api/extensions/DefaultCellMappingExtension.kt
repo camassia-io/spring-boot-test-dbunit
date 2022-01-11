@@ -3,6 +3,12 @@ package io.camassia.spring.dbunit.api.extensions
 import io.camassia.spring.dbunit.api.DbUnitException
 import io.camassia.spring.dbunit.api.dataset.Cell
 
+/**
+ * Handles Cells with Templated content e.g.
+ * Cell("name", "\[SOME_VALUE]")
+ *
+ * With an override set up. If an override is missing this extension will look in global defaults for a fallback. Failing that an exception will be thrown.
+ */
 class DefaultTemplatedCellMappingExtension(private val defaults: Defaults) : CellMappingExtension {
 
     override fun applyTo(table: String, cell: Cell, overrides: Map<String, Any?>): Cell {

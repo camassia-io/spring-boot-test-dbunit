@@ -69,7 +69,7 @@ class SpringBootTestDbUnitConfiguration {
                 NullCellMappingExtension,
                 // Resolves all file replacements
                 ResourceBasedValueCellMappingExtension(resourceLoader),
-                // Resolves all remaining templates and nulls any leftover
+                // Resolves all remaining templates and uses global defaults for any missing values in the form [.*]
                 DefaultTemplatedCellMappingExtension(dbDefaults)
             ),
             dbDefaults
