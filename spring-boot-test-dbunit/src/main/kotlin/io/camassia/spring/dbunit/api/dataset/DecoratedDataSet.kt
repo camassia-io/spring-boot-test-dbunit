@@ -15,6 +15,7 @@ class DecoratedDataSet(private val underlying: IDataSet): IDataSet {
 
     override fun getTable(tableName: String): ITable = underlying.getTable(tableName)
 
+    @Suppress("DEPRECATION")
     override fun getTables(): Array<ITable> = underlying.tables
 
     override fun iterator(): ITableIterator = underlying.iterator()
