@@ -219,6 +219,21 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result[0].component2()).isEqualTo("default")
             }
 
+            @Test
+            fun `should use defaults for missing overrides if available`() {
+                dbunit.givenDataSet(
+                    DatabaseTesterTest::class,
+                    File(
+                        "/TemplatedDemo1.xml",
+                        Cell("[ID]", "1")
+                    )
+                )
+
+                val result = selectAllFrom("demo1")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isEqualTo("default")
+            }
         }
 
         @Nested

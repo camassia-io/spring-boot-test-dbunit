@@ -1,19 +1,15 @@
 package io.camassia.spring.dbunit.api.extensions
 
-import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.Cell
 
 class Extensions(
-    val cellMapping: List<CellMappingExtension>,
-    defaults: List<TableDefaults>
+    private val cellMapping: List<CellMappingExtension>,
+    val defaults: Defaults
 ) {
-    val defaults = Defaults(defaults)
 
-    class Defaults(
-        private val defaults: List<TableDefaults>
-    ) {
-        fun forTable(table: String, ignoreCase: Boolean): Set<Cell> = defaults.filter { it.table.equals(table, ignoreCase) }.flatMap { it.overrides }.toSet()
-        fun forColumn(table: String, column: String, ignoreCase: Boolean): Cell? = forTable(table, ignoreCase).find { it.key.equals(column, ignoreCase) }
-    }
+    fun applyToCell(table: String, cell: Cell, overrides: Map<String, Any?>) = cellMapping
+        .fold(cell) { acc, extension ->
+            extension.applyTo(table, acc, overrides)
+        }
 
 }

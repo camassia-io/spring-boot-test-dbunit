@@ -5,11 +5,12 @@ import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.TableDefaults
 import io.camassia.spring.dbunit.api.dataset.DataSetParser
 import io.camassia.spring.dbunit.api.dataset.xml.XmlDataSetParser
+import io.camassia.spring.dbunit.api.extensions.DefaultTemplatedCellMappingExtension
+import io.camassia.spring.dbunit.api.extensions.Defaults
 import io.camassia.spring.dbunit.api.extensions.Extensions
-import io.camassia.spring.dbunit.api.extensions.FinalTemplatedCellMappingExtension
-import io.camassia.spring.dbunit.api.extensions.InitialTemplatedCellMappingExtension
 import io.camassia.spring.dbunit.api.extensions.NullCellMappingExtension
 import io.camassia.spring.dbunit.api.extensions.ResourceBasedValueCellMappingExtension
+import io.camassia.spring.dbunit.api.extensions.TemplatedCellMappingExtension
 import io.camassia.spring.dbunit.api.io.DefaultLocalResourceLoader
 import io.camassia.spring.dbunit.api.io.ResourceLoader
 import org.dbunit.database.DatabaseConfig
@@ -55,20 +56,25 @@ class SpringBootTestDbUnitConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun extensions(
-        resourceLoader: ResourceLoader, defaults: List<TableDefaults>
-    ): Extensions = Extensions(
-        listOf(
-            // Resolves all known templates and ignores unknowns for further processing
-            InitialTemplatedCellMappingExtension,
-            // Replaces all [null]s will null
-            NullCellMappingExtension,
-            // Resolves all file replacements
-            ResourceBasedValueCellMappingExtension(resourceLoader),
-            // Resolves all remaining templates and nulls any leftover
-            FinalTemplatedCellMappingExtension
-        ),
-        defaults
-    )
+        resourceLoader: ResourceLoader,
+        defaults: List<TableDefaults>,
+        config: DatabaseConfig
+    ): Extensions {
+        val dbDefaults = Defaults(defaults, !(config.getProperty(DatabaseConfig.FEATURE_CASE_SENSITIVE_TABLE_NAMES) as Boolean))
+        return Extensions(
+            listOf(
+                // Resolves all known templates and ignores unknowns for further processing
+                TemplatedCellMappingExtension,
+                // Replaces all [null]s will null
+                NullCellMappingExtension,
+                // Resolves all file replacements
+                ResourceBasedValueCellMappingExtension(resourceLoader),
+                // Resolves all remaining templates and nulls any leftover
+                DefaultTemplatedCellMappingExtension(dbDefaults)
+            ),
+            dbDefaults
+        )
+    }
 
     /**
      * Used for modifying the underlying DatabaseTester
@@ -85,6 +91,7 @@ class SpringBootTestDbUnitConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun defaultDatabaseTester(
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         connectionSupplier: ConnectionSupplier,
         config: DatabaseConfig,
         resourceLoader: ResourceLoader,

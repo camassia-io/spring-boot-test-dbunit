@@ -48,7 +48,7 @@ internal class TableBasedDataSetBuilder(
             val table = tables.table
             val tableName = table.tableMetaData.tableName
             val columnsFromDataSet = table.tableMetaData.columns.toSet()
-            val columnsFromDefaults = this.extensions.defaults.forTable(tableName, ignoreCase).map { Column(it.key, DataType.UNKNOWN) }
+            val columnsFromDefaults = this.extensions.defaults.forTable(tableName).map { Column(it.key, DataType.UNKNOWN) }
             val columns: Array<Column> = if(columnsFromDataSet.isNotEmpty()) (columnsFromDefaults + columnsFromDataSet).distinctBy { keyOf(it.columnName) }.toTypedArray() else emptyArray()
             val primaryKeys = table.tableMetaData.primaryKeys
 
@@ -60,12 +60,11 @@ internal class TableBasedDataSetBuilder(
                 (0 until table.rowCount).forEach { rowIndex ->
                     val cells: Array<out Any?> = columns.map { column ->
                         val rawCellValue: Any? = columnsFromDataSet.find { it.columnName.equals(column.columnName, ignoreCase) }?.let { table.getValue(rowIndex, it.columnName) }
-                        val fallback = if(rawCellValue == null) extensions.defaults.forColumn(tableName, column.columnName, ignoreCase)?.value else null
+                        val fallback = if(rawCellValue == null) extensions.defaults.forColumn(tableName, column.columnName)?.value else null
                         // Process all extensions and fallback to a default value if the cell is not set
-                        extensions.cellMapping
-                            .fold(Cell(column.columnName, rawCellValue)) { acc, extension ->
-                                extension.applyTo(tableName, acc, overrides)
-                            }.mapValue { value ->
+                        extensions
+                            .applyToCell(tableName, Cell(column.columnName, rawCellValue), overrides)
+                            .mapValue { value ->
                                 value ?: fallback
                             }
                     }
@@ -91,9 +90,9 @@ internal class TableBasedDataSetBuilder(
         tables.groupBy { keyOf(it.name) }.mapValues { (_, tables) ->
             tables.flatMap { it.rows }
         }.forEach { (tableName, rows) ->
-            val defaults: Set<Cell> = this.extensions.defaults.forTable(tableName, ignoreCase)
+            val defaults: Set<Cell> = this.extensions.defaults.forTable(tableName)
             val columnsFromDataSet = rows.flatMap { it.cells }.map { Column(it.key, DataType.UNKNOWN) }
-            val columnsFromDefaults = this.extensions.defaults.forTable(tableName, ignoreCase).map { Column(it.key, DataType.UNKNOWN) }
+            val columnsFromDefaults = this.extensions.defaults.forTable(tableName).map { Column(it.key, DataType.UNKNOWN) }
             val columns: Array<Column> = if(columnsFromDataSet.isNotEmpty()) (columnsFromDefaults + columnsFromDataSet).distinctBy { keyOf(it.columnName) }.toTypedArray() else emptyArray()
 
             consumer.startTable(DefaultTableMetaData(tableName, columns))
@@ -105,10 +104,9 @@ internal class TableBasedDataSetBuilder(
                         val rawCellValue: Any? = row.cells.find { it.key.equals(column.columnName, ignoreCase) }?.value
                         val fallback = if(rawCellValue == null) defaults.find { it.key.equals(column.columnName, ignoreCase) }?.value else null
                         // Process all extensions and fallback to a default value if the cell is not set
-                        extensions.cellMapping
-                            .fold(Cell(column.columnName, rawCellValue)) { acc, extension ->
-                                extension.applyTo(tableName, acc, overrides)
-                            }.mapValue { value ->
+                        extensions
+                            .applyToCell(tableName, Cell(column.columnName, rawCellValue), overrides)
+                            .mapValue { value ->
                                 value ?: fallback
                             }
                     }
