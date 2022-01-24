@@ -17,6 +17,10 @@ dependencies {
     }
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.6.2")
+    testImplementation("org.assertj:assertj-core:3.19.0")
+    testImplementation("io.mockk:mockk:1.10.6")
 }
 
 tasks {
