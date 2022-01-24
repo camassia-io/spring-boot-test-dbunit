@@ -15,9 +15,11 @@ class DefaultTemplatedCellMappingExtension(private val defaults: Defaults) : Cel
         val value = cell.value
         return if (value != null && value is String && value.startsWith('[') && value.endsWith(']')) {
             cell.mapValue {
-                overrides[value] ?: defaults.forColumn(table, cell.key)?.value ?: throw DbUnitException(
-                    "Expected an Override for $value but there wasn't one configured. Overrides available were: ${overrides.entries.joinToString { (k, v) -> "$k=$v" }}"
-                )
+                overrides[value] ?: run {
+                    defaults.forColumn(table, cell.key) ?: throw DbUnitException(
+                        "Expected an Override for $value but there wasn't one configured. Overrides available were: ${overrides.entries.joinToString { (k, v) -> "$k=$v" }}"
+                    )
+                }.value
             }
         } else cell
     }
