@@ -17,7 +17,7 @@ class DefaultTemplatedCellMappingExtension(private val defaults: Defaults) : Cel
             cell.mapValue {
                 overrides[value] ?: run {
                     defaults.forColumn(table, cell.key) ?: throw DbUnitException(
-                        "Expected an Override for $value but there wasn't one configured. Overrides available were: ${overrides.entries.joinToString { (k, v) -> "$k=$v" }}"
+                        "Expected an Override for $value but there wasn't one configured. Overrides available were: ${overrides.entries.joinToString(",","[","]"){ (k, v) -> "$k=$v" }}"
                     )
                 }.value
             }
