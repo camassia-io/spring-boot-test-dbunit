@@ -17,7 +17,7 @@ internal class TableBasedDataSetBuilder(
     private val ignoreCase: Boolean = false
 ) {
 
-    private val keyOf: (String) -> (String) = if(ignoreCase) { i -> i.toUpperCase() } else { i -> i }
+    private val keyOf: (String) -> (String) = if(ignoreCase) { i -> i.uppercase() } else { i -> i }
 
     fun joinAndApplyExtensions(dataSets: Map<IDataSet, Map<String, Any?>>): DecoratedDataSet {
         return if (dataSets.size == 1) dataSets.entries.first().let { (dataSet, overrides) ->
