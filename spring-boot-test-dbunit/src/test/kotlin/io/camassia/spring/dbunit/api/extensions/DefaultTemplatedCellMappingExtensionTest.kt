@@ -30,9 +30,11 @@ internal class DefaultTemplatedCellMappingExtensionTest {
 
     @Test
     fun `should map to template override`() {
-        val output = extension.applyTo("Table", Cell("Column", "[Value]"), Overrides("[Value]" to "Override"))
-
-        assertThat(output).isEqualTo(Cell("Column", "Override"))
+        assertThat(extension.applyTo("Table", Cell("Column", "[value]"), Overrides("[value]" to "Override"))).isEqualTo(Cell("Column", "Override"))
+        assertThat(extension.applyTo("Table", Cell("Column", "[VALUE]"), Overrides("[VALUE]" to "Override"))).isEqualTo(Cell("Column", "Override"))
+        assertThat(extension.applyTo("Table", Cell("Column", "[VALUE123]"), Overrides("[VALUE123]" to "Override"))).isEqualTo(Cell("Column", "Override"))
+        assertThat(extension.applyTo("Table", Cell("Column", "[VALUE_123]"), Overrides("[VALUE_123]" to "Override"))).isEqualTo(Cell("Column", "Override"))
+        assertThat(extension.applyTo("Table", Cell("Column", "[VALUE-123]"), Overrides("[VALUE-123]" to "Override"))).isEqualTo(Cell("Column", "Override"))
     }
 
     @Test
