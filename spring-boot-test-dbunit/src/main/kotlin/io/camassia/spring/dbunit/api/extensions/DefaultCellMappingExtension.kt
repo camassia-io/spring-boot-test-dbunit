@@ -3,6 +3,7 @@ package io.camassia.spring.dbunit.api.extensions
 import io.camassia.spring.dbunit.api.DbUnitException
 import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.Overrides
+import org.slf4j.LoggerFactory
 
 /**
  * Handles Cells with Templated content e.g.
@@ -18,13 +19,20 @@ class DefaultTemplatedCellMappingExtension(private val defaults: Defaults) : Cel
         val value = cell.value
         return if (value != null && value is String && regex.matches(value)) {
             cell.mapValue {
-                overrides[value] ?: run {
-                    defaults.forColumn(table, cell.key) ?: throw DbUnitException(
-                        "Expected an Override for $value but there wasn't one configured. Overrides available were: ${overrides}"
-                    )
-                }.value
+                overrides[value]
+                    ?.also { log.debug("Replacing Templated val $value with override: '$it'") }
+                    ?: run {
+                        defaults.forColumn(table, cell.key)?.also { log.debug("Replacing Templated val $value with default: '${it.value}'") }
+                            ?: throw DbUnitException(
+                                "Expected an Override for $value but there wasn't one configured. Overrides available were: ${overrides}"
+                            )
+                    }.value
             }
         } else cell
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(DefaultTemplatedCellMappingExtension::class.java)
     }
 
 }

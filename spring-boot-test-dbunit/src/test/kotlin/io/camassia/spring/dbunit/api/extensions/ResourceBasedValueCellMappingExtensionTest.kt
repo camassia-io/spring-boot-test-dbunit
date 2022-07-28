@@ -2,7 +2,6 @@ package io.camassia.spring.dbunit.api.extensions
 
 import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.Overrides
-import io.camassia.spring.dbunit.api.dataset.Row
 import io.camassia.spring.dbunit.api.io.ResourceLoader
 import io.mockk.every
 import io.mockk.mockk
@@ -17,7 +16,6 @@ internal class ResourceBasedValueCellMappingExtensionTest {
     private val extension = ResourceBasedValueCellMappingExtension(loader)
 
     private val table = "table"
-    private val row = mockk<Row>()
 
     @Test
     fun shouldMapFilenames() {
