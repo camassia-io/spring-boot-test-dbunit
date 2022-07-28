@@ -12,9 +12,11 @@ import io.camassia.spring.dbunit.api.dataset.Overrides
  */
 class DefaultTemplatedCellMappingExtension(private val defaults: Defaults) : CellMappingExtension {
 
+    private val regex = Regex("^\\[[a-zA-Z_]+\\]\$")
+
     override fun applyTo(table: String, cell: Cell, overrides: Overrides): Cell {
         val value = cell.value
-        return if (value != null && value is String && value.startsWith('[') && value.endsWith(']')) {
+        return if (value != null && value is String && regex.matches(value)) {
             cell.mapValue {
                 overrides[value] ?: run {
                     defaults.forColumn(table, cell.key) ?: throw DbUnitException(

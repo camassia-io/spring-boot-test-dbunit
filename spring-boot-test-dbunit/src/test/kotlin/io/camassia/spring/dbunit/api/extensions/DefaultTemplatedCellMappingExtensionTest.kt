@@ -22,6 +22,13 @@ internal class DefaultTemplatedCellMappingExtensionTest {
     }
 
     @Test
+    fun `should leave json arrays untouched`() {
+        assertThat(extension.applyTo("Table", Cell("Column", """[]"""), Overrides())).isEqualTo(Cell("Column", """[]"""))
+        assertThat(extension.applyTo("Table", Cell("Column", """["value"]"""), Overrides())).isEqualTo(Cell("Column", """["value"]"""))
+        assertThat(extension.applyTo("Table", Cell("Column", """[{"field": "value"}]"""), Overrides())).isEqualTo(Cell("Column", """[{"field": "value"}]"""))
+    }
+
+    @Test
     fun `should map to template override`() {
         val output = extension.applyTo("Table", Cell("Column", "[Value]"), Overrides("[Value]" to "Override"))
 
