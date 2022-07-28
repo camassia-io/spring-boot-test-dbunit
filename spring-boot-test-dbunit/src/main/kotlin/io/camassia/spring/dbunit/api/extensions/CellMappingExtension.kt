@@ -1,6 +1,7 @@
 package io.camassia.spring.dbunit.api.extensions
 
 import io.camassia.spring.dbunit.api.dataset.Cell
+import io.camassia.spring.dbunit.api.dataset.Overrides
 
 interface CellMappingExtension {
 
@@ -12,7 +13,7 @@ interface CellMappingExtension {
     fun applyTo(
         table: String,
         cell: Cell,
-        overrides: Map<String, Any?>
+        overrides: Overrides
     ): Cell
 
 }

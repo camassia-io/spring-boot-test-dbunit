@@ -2,6 +2,7 @@ package io.camassia.spring.dbunit.api.dataset.builder
 
 import io.camassia.spring.dbunit.api.dataset.Cell
 import io.camassia.spring.dbunit.api.dataset.DecoratedDataSet
+import io.camassia.spring.dbunit.api.dataset.Overrides
 import io.camassia.spring.dbunit.api.dataset.Table
 import io.camassia.spring.dbunit.api.extensions.Extensions
 import org.dbunit.dataset.CachedDataSet
@@ -19,7 +20,7 @@ internal class TableBasedDataSetBuilder(
 
     private val keyOf: (String) -> (String) = if(ignoreCase) { i -> i.uppercase() } else { i -> i }
 
-    fun joinAndApplyExtensions(dataSets: Map<IDataSet, Map<String, Any?>>): DecoratedDataSet {
+    fun joinAndApplyExtensions(dataSets: Map<IDataSet, Overrides>): DecoratedDataSet {
         return if (dataSets.size == 1) dataSets.entries.first().let { (dataSet, overrides) ->
             applyExtensions(dataSet, overrides)
         } else {
@@ -35,7 +36,7 @@ internal class TableBasedDataSetBuilder(
 
     fun applyExtensions(
         dataSet: IDataSet,
-        overrides: Map<String, Any?>
+        overrides: Overrides
     ): DecoratedDataSet {
         if (dataSet is DecoratedDataSet) return dataSet
 
@@ -81,7 +82,7 @@ internal class TableBasedDataSetBuilder(
 
     fun build(
         tables: Collection<Table>,
-        overrides: Map<String, Any?>
+        overrides: Overrides
     ): DecoratedDataSet {
         val dataSet = CachedDataSet()
         val consumer = BufferedConsumer(dataSet)

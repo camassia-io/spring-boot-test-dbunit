@@ -1,6 +1,7 @@
 package io.camassia.spring.dbunit.api.extensions
 
 import io.camassia.spring.dbunit.api.dataset.Cell
+import io.camassia.spring.dbunit.api.dataset.Overrides
 import io.camassia.spring.dbunit.api.dataset.Row
 import io.camassia.spring.dbunit.api.io.ResourceLoader
 import io.mockk.every
@@ -20,16 +21,16 @@ internal class ResourceBasedValueCellMappingExtensionTest {
 
     @Test
     fun shouldMapFilenames() {
-        assertThat(extension.applyTo(table, Cell("key", "[file:abc.txt]"), emptyMap())).isEqualTo(Cell("key", "content"))
-        assertThat(extension.applyTo(table, Cell("key", "[file:/abc.json]"), emptyMap())).isEqualTo(Cell("key", "content"))
-        assertThat(extension.applyTo(table, Cell("key", "[file:abc-123.json]"), emptyMap())).isEqualTo(Cell("key", "content"))
-        assertThat(extension.applyTo(table, Cell("key", "[file:abc_123.xml]"), emptyMap())).isEqualTo(Cell("key", "content"))
+        assertThat(extension.applyTo(table, Cell("key", "[file:abc.txt]"), Overrides())).isEqualTo(Cell("key", "content"))
+        assertThat(extension.applyTo(table, Cell("key", "[file:/abc.json]"), Overrides())).isEqualTo(Cell("key", "content"))
+        assertThat(extension.applyTo(table, Cell("key", "[file:abc-123.json]"), Overrides())).isEqualTo(Cell("key", "content"))
+        assertThat(extension.applyTo(table, Cell("key", "[file:abc_123.xml]"), Overrides())).isEqualTo(Cell("key", "content"))
     }
 
     @Test
     fun shouldNotMapOtherValues() {
-        assertThat(extension.applyTo(table, Cell("key", "[null]"), emptyMap())).isEqualTo(Cell("key", "[null]"))
-        assertThat(extension.applyTo(table, Cell("key", "other"), emptyMap())).isEqualTo(Cell("key", "other"))
-        assertThat(extension.applyTo(table, Cell("key", "other.txt"), emptyMap())).isEqualTo(Cell("key", "other.txt"))
+        assertThat(extension.applyTo(table, Cell("key", "[null]"), Overrides())).isEqualTo(Cell("key", "[null]"))
+        assertThat(extension.applyTo(table, Cell("key", "other"), Overrides())).isEqualTo(Cell("key", "other"))
+        assertThat(extension.applyTo(table, Cell("key", "other.txt"), Overrides())).isEqualTo(Cell("key", "other.txt"))
     }
 }

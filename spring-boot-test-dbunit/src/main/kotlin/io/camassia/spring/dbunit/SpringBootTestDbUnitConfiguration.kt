@@ -97,14 +97,16 @@ class SpringBootTestDbUnitConfiguration {
         resourceLoader: ResourceLoader,
         dataSetParser: DataSetParser,
         extensions: Extensions,
-        @Value("\${spring.dbunit.schema:#{null}}") schema: String?
+        @Value("\${spring.dbunit.schema:#{null}}") schema: String?,
+        @Value("\${spring.dbunit.fail_on_unused_overrides:true}") failOnUnusedOverrides: Boolean
     ): DatabaseTester = DatabaseTester(
         connectionSupplier,
         config,
         resourceLoader,
         dataSetParser,
         extensions,
-        schema
+        schema,
+        failOnUnusedOverrides
     )
 
 }

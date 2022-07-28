@@ -1,6 +1,7 @@
 package io.camassia.spring.dbunit.api.extensions
 
 import io.camassia.spring.dbunit.api.dataset.Cell
+import io.camassia.spring.dbunit.api.dataset.Overrides
 import io.camassia.spring.dbunit.api.io.ResourceLoader
 
 /**
@@ -11,7 +12,7 @@ class ResourceBasedValueCellMappingExtension(
     private val resourceLoader: ResourceLoader
 ) : CellMappingExtension {
 
-    override fun applyTo(table: String, cell: Cell, overrides: Map<String, Any?>): Cell {
+    override fun applyTo(table: String, cell: Cell, overrides: Overrides): Cell {
         val value = cell.value
 
         return if (value != null && value is String && value.startsWith("[file:") && value.endsWith("]")) {

@@ -11,6 +11,7 @@ import io.camassia.spring.dbunit.api.dataset.Row
 import io.camassia.spring.dbunit.api.dataset.Table
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.dbunit.dataset.NoSuchColumnException
 import org.dbunit.dataset.NoSuchTableException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -261,6 +262,20 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result[0].component1()).isEqualTo(1)
                 assertThat(result[0].component2()).isEqualTo("long-value")
             }
+
+            @Test
+            fun `should throw exception for unknown field`() {
+                assertThatThrownBy {
+                    dbunit.givenDataSet(
+                        DatabaseTesterTest::class,
+                        File(
+                            "/TemplatedDemo1.xml",
+                            Cell("[ID]", "1"),
+                            Cell("[UNKNOWN]", "123"),
+                        )
+                    )
+                }.isInstanceOf(DbUnitException::class.java)
+            }
         }
 
         @Nested
@@ -350,6 +365,18 @@ class DatabaseTesterTest @Autowired constructor(
                 assertThat(result).hasSize(1)
                 assertThat(result[0].component1()).isEqualTo(1)
                 assertThat(result[0].component2()).isEqualTo("long-value")
+            }
+
+            @Test
+            fun `should throw exception for unknown field`() {
+                assertThatThrownBy {
+                    dbunit.givenDataSet(
+                        Table(
+                            "demo1",
+                            Row(Cell("id", "1"), Cell("unknown", "Test1"))
+                        )
+                    )
+                }.hasCauseInstanceOf(NoSuchColumnException::class.java)
             }
 
             @Nested

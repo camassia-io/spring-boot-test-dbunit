@@ -4,6 +4,7 @@ import io.camassia.spring.dbunit.api.connection.ConnectionSupplier
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
 import io.camassia.spring.dbunit.api.dataset.DataSetParser
 import io.camassia.spring.dbunit.api.dataset.File
+import io.camassia.spring.dbunit.api.dataset.Overrides
 import io.camassia.spring.dbunit.api.dataset.Table
 import io.camassia.spring.dbunit.api.dataset.builder.TableBasedDataSetBuilder
 import io.camassia.spring.dbunit.api.extensions.Extensions
@@ -16,6 +17,7 @@ import org.dbunit.dataset.CachedDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
 import org.dbunit.util.TableFormatter
+import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 
 /**
@@ -27,7 +29,8 @@ open class DatabaseTester(
     private val resourceLoader: ResourceLoader,
     private val dataSetParser: DataSetParser,
     extensions: Extensions,
-    schema: String? = null
+    schema: String?,
+    private val failOnUnusedOverrides: Boolean
 ) : AbstractDatabaseTester(schema) {
 
     private val dataSetBuilder = TableBasedDataSetBuilder(
@@ -107,8 +110,8 @@ open class DatabaseTester(
         files: Collection<File>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
-        val dataSets: Map<IDataSet, Map<String, Any?>> = files.associate { file ->
-            resourceLoader.getResourceInputStream(clazz, file.path).let { dataSetParser.parseDataSet(it) } to file.overrides.associateBy({ it.key }, { it.value })
+        val dataSets: Map<IDataSet, Overrides> = files.associate { file ->
+            resourceLoader.getResourceInputStream(clazz, file.path).let { dataSetParser.parseDataSet(it) } to Overrides(file.overrides.associateBy({ it.key }, { it.value }))
         }
         givenDataSet(dataSets, operation)
     }
@@ -129,8 +132,8 @@ open class DatabaseTester(
         tables: Collection<Table>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
-        val dataSet: IDataSet = dataSetBuilder.build(tables, emptyMap())
-        givenDataSet(dataSet, emptyMap(), operation)
+        val dataSet: IDataSet = dataSetBuilder.build(tables, Overrides())
+        givenDataSet(dataSet, Overrides(), operation)
     }
 
     /**
@@ -152,7 +155,7 @@ open class DatabaseTester(
     fun givenDataSet(
         dataSet: Array<IDataSet>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
-    ) = givenDataSet(dataSet.associateWith { emptyMap() }, operation)
+    ) = givenDataSet(dataSet.associateWith { Overrides() }, operation)
 
     /**
      * Loads a DataSet with overrides
@@ -160,7 +163,7 @@ open class DatabaseTester(
     @Suppress("UsePropertyAccessSyntax")
     fun givenDataSet(
         dataSet: IDataSet,
-        overrides: Map<String, Any?> = emptyMap(),
+        overrides: Overrides = Overrides(),
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) = givenDataSet(mapOf(dataSet to overrides), operation)
 
@@ -169,12 +172,21 @@ open class DatabaseTester(
      */
     @Suppress("UsePropertyAccessSyntax")
     fun givenDataSet(
-        dataSets: Map<IDataSet, Map<String, Any?>>,
+        dataSets: Map<IDataSet, Overrides>,
         operation: DatabaseOperation = DatabaseOperation.CLEAN_INSERT
     ) {
         setSetUpOperation(operation.underlying)
         val compositeDataSet = dataSetBuilder.joinAndApplyExtensions(dataSets)
         setDataSet(compositeDataSet)
+
+        // Verify all Overrides have been used
+        dataSets.values.map { it.unused() }.forEach {
+            if(it.isNotEmpty()) {
+                val message = "There were unused overrides: $it. Could there be a typo?"
+                if(failOnUnusedOverrides) throw DbUnitException(message) else log.warn(message)
+            }
+        }
+
         try {
             onSetup()
         } catch (throwable: Throwable) {
@@ -233,5 +245,9 @@ open class DatabaseTester(
     override fun getConnection(): IDatabaseConnection = DatabaseConnection(connectionSupplier.getConnection())
         .also { it.apply(config) }
         .also { connectionSupplier.afterCreation(it) }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(DatabaseTester::class.java)
+    }
 
 }

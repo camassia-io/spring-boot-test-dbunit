@@ -1,6 +1,7 @@
 package io.camassia.spring.dbunit.api.extensions
 
 import io.camassia.spring.dbunit.api.dataset.Cell
+import io.camassia.spring.dbunit.api.dataset.Overrides
 
 /**
  * Handles Cells with Templated content e.g.
@@ -10,7 +11,7 @@ import io.camassia.spring.dbunit.api.dataset.Cell
  */
 object TemplatedCellMappingExtension : CellMappingExtension {
 
-    override fun applyTo(table: String, cell: Cell, overrides: Map<String, Any?>): Cell {
+    override fun applyTo(table: String, cell: Cell, overrides: Overrides): Cell {
         val value = cell.value
         return if (value != null && value is String && value.startsWith('[') && value.endsWith(']') && overrides.containsKey(value)) {
             cell.mapValue { overrides[value] }
