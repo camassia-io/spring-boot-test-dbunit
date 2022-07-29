@@ -183,7 +183,8 @@ open class DatabaseTester(
         dataSets.values.map { it.unused() }.forEach {
             if(it.isNotEmpty()) {
                 val message = "There were unused overrides: $it. Could there be a typo?"
-                if(failOnUnusedOverrides) throw DbUnitException(message) else log.warn(message)
+                if(failOnUnusedOverrides) throw DbUnitException("$message \nNote: this error can be suppressed using spring property: spring.dbunit.fail_on_unused_overrides=false")
+                else log.warn(message)
             }
         }
 
