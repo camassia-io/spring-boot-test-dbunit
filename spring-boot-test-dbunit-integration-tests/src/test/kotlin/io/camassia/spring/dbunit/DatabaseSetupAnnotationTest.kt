@@ -352,6 +352,47 @@ class DatabaseSetupAnnotationTest : RepositoryTest() {
         }
     }
 
+    @Nested
+    @DatabaseSetup(tables = [
+        Table("demo1",
+            Row(Cell("id", "1"), Cell("name", "Test1"))
+        )
+    ])
+    inner class WithMultipleLevelsOfAnnotations {
+        @Nested
+        @DatabaseSetup(tables = [
+            Table("demo1",
+                Row(Cell("id", "2"), Cell("name", "Test2"))
+            )
+        ], operation = DatabaseOperation.INSERT)
+        inner class LevelTwo {
+            @Nested
+            @DatabaseSetup(tables = [
+                Table("demo1",
+                    Row(Cell("id", "3"), Cell("name", "Test3"))
+                )
+            ], operation = DatabaseOperation.INSERT)
+            inner class LevelTwo {
+                @Test
+                @DatabaseSetup(tables = [
+                    Table("demo1",
+                        Row(Cell("id", "4"), Cell("name", "Test4"))
+                    )
+                ], operation = DatabaseOperation.INSERT)
+                fun `should combine multiple levels of annotations`() {
+                    val result = selectAllFrom("demo1")
+                    assertThat(result).hasSize(4)
+                    assertThat(result).containsExactly(
+                        1L to "Test1",
+                        2L to "Test2",
+                        3L to "Test3",
+                        4L to "Test4",
+                    )
+                }
+            }
+        }
+    }
+
     @TestConfiguration
     class DemoTestConfiguration {
 

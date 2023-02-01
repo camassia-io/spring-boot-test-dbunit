@@ -2,6 +2,7 @@ package io.camassia.spring.dbunit.api.wiring
 
 import io.camassia.spring.dbunit.api.DatabaseTester
 import io.camassia.spring.dbunit.api.DbUnitException
+import io.camassia.spring.dbunit.api.NestedClassUtil
 import io.camassia.spring.dbunit.api.annotations.DatabaseSetup
 import io.camassia.spring.dbunit.api.annotations.DatabaseTeardown
 import io.camassia.spring.dbunit.api.customization.DatabaseOperation
@@ -93,7 +94,7 @@ class DatabaseSetupAndTeardownTestExecutionListener : TestExecutionListener, Ord
         }
     )
 
-    private fun TestContext.annotations() = (this.testClass.annotations + this.testMethod.annotations)
+    private fun TestContext.annotations(): List<Annotation> = NestedClassUtil.getHierarchy(this.testClass).flatMap { it.annotations.toList() } + this.testMethod.annotations.toList()
     private fun TestContext.dbUnit() = applicationContext.getBean(DatabaseTester::class.java)
     private fun String.toArray() = this.takeIf { it.isNotEmpty() }?.let { arrayOf(it) } ?: emptyArray()
 }
