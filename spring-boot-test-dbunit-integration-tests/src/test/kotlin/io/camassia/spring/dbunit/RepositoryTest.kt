@@ -11,6 +11,7 @@ import org.springframework.test.context.jdbc.SqlGroup
         statements = [
             "CREATE TABLE demo1 (id BIGINT NOT NULL, name VARCHAR(50), CONSTRAINT demo1_pk PRIMARY KEY (id))",
             "CREATE TABLE demo2 (id BIGINT NOT NULL, name VARCHAR(50), CONSTRAINT demo2_pk PRIMARY KEY (id))",
+            "CREATE TABLE demo3 (id BIGINT NOT NULL, name VARCHAR(50), CONSTRAINT demo3_pk PRIMARY KEY (id))",
         ],
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     ),
@@ -18,6 +19,7 @@ import org.springframework.test.context.jdbc.SqlGroup
         statements = [
             "DROP TABLE demo1",
             "DROP TABLE demo2",
+            "DROP TABLE demo3",
         ],
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )

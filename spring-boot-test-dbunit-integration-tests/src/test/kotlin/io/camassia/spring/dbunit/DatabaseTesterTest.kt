@@ -40,6 +40,15 @@ class DatabaseTesterTest @Autowired constructor(
         @Nested
         inner class WithFilenames {
             @Test
+            fun `should handle database clear`() {
+                dbunit.givenDataSet(DatabaseTesterTest::class, "/Empty123.xml")
+
+                assertThat(selectAllFrom("demo1")).isEmpty()
+                assertThat(selectAllFrom("demo2")).isEmpty()
+                assertThat(selectAllFrom("demo3")).isEmpty()
+            }
+
+            @Test
             fun `should handle files with one row in multiple tables`() {
                 dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo-WithOneRowInMultipleTables.xml")
 
@@ -108,6 +117,16 @@ class DatabaseTesterTest @Autowired constructor(
             }
 
             @Test
+            fun `should use defaults for empty row`() {
+                dbunit.givenDataSet(DatabaseTesterTest::class, "/TemplatedDemo3.xml")
+
+                val result = selectAllFrom("demo3")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(3)
+                assertThat(result[0].component2()).isEqualTo("default")
+            }
+
+            @Test
             fun `should replace special file params`() {
                 dbunit.givenDataSet(DatabaseTesterTest::class, "/Demo-WithFile.xml")
 
@@ -120,6 +139,18 @@ class DatabaseTesterTest @Autowired constructor(
 
         @Nested
         inner class WithTemplatedFiles {
+            @Test
+            fun `should handle database clear`() {
+                dbunit.givenDataSet(
+                    DatabaseTesterTest::class,
+                    File("/Empty123.xml")
+                )
+
+                assertThat(selectAllFrom("demo1")).isEmpty()
+                assertThat(selectAllFrom("demo2")).isEmpty()
+                assertThat(selectAllFrom("demo3")).isEmpty()
+            }
+
             @Test
             fun `should handle files with one row in multiple tables`() {
                 dbunit.givenDataSet(
@@ -231,6 +262,19 @@ class DatabaseTesterTest @Autowired constructor(
             }
 
             @Test
+            fun `should use defaults for empty row`() {
+                dbunit.givenDataSet(
+                    DatabaseTesterTest::class,
+                    File("/TemplatedDemo3.xml")
+                )
+
+                val result = selectAllFrom("demo3")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(3)
+                assertThat(result[0].component2()).isEqualTo("default")
+            }
+
+            @Test
             fun `should use defaults for missing overrides if available`() {
                 dbunit.givenDataSet(
                     DatabaseTesterTest::class,
@@ -280,6 +324,19 @@ class DatabaseTesterTest @Autowired constructor(
 
         @Nested
         inner class WithProgrammaticDataSet {
+            @Test
+            fun `should handle database clear`() {
+                dbunit.givenDataSet(
+                    Table("demo1", emptyList()),
+                    Table("demo2", emptyList()),
+                    Table("demo3", emptyList())
+                )
+
+                assertThat(selectAllFrom("demo1")).isEmpty()
+                assertThat(selectAllFrom("demo2")).isEmpty()
+                assertThat(selectAllFrom("demo3")).isEmpty()
+            }
+
             @Test
             fun `should handle datasets with one row in multiple tables`() {
                 dbunit.givenDataSet(
@@ -334,6 +391,21 @@ class DatabaseTesterTest @Autowired constructor(
                 val result = selectAllFrom("demo1")
                 assertThat(result).hasSize(1)
                 assertThat(result[0].component1()).isEqualTo(1)
+                assertThat(result[0].component2()).isEqualTo("default")
+            }
+
+            @Test
+            fun `should use defaults for empty row`() {
+                dbunit.givenDataSet(
+                    Table(
+                        "demo3",
+                        Row(emptyList())
+                    )
+                )
+
+                val result = selectAllFrom("demo3")
+                assertThat(result).hasSize(1)
+                assertThat(result[0].component1()).isEqualTo(3)
                 assertThat(result[0].component2()).isEqualTo("default")
             }
 
@@ -469,10 +541,11 @@ class DatabaseTesterTest @Autowired constructor(
         fun `should build a dataset from the current db state`() {
             insertInto("demo1", 1, "name1")
             insertInto("demo2", 2, "name2")
+            insertInto("demo3", 3, "name3")
 
             val dataSet = dbunit.createDataset()
 
-            assertThat(dataSet.tableNames).containsExactlyInAnyOrder("DEMO1", "DEMO2")
+            assertThat(dataSet.tableNames).containsExactlyInAnyOrder("DEMO1", "DEMO2", "DEMO3")
             val demo1 = dataSet.getTable("demo1")
             assertThat(demo1.rowCount).isOne
             assertThat(demo1.getValue(0, "id") as BigInteger).isEqualTo(1)
@@ -481,6 +554,10 @@ class DatabaseTesterTest @Autowired constructor(
             assertThat(demo2.rowCount).isOne
             assertThat(demo2.getValue(0, "id") as BigInteger).isEqualTo(2)
             assertThat(demo2.getValue(0, "name")).isEqualTo("name2")
+            val demo3 = dataSet.getTable("demo3")
+            assertThat(demo3.rowCount).isOne
+            assertThat(demo3.getValue(0, "id") as BigInteger).isEqualTo(3)
+            assertThat(demo3.getValue(0, "name")).isEqualTo("name3")
         }
 
         @Test
@@ -544,6 +621,9 @@ class DatabaseTesterTest @Autowired constructor(
         fun connectionSupplier(ds: DataSource) = DataSourceConnectionSupplier(ds)
 
         @Bean
-        fun tableDefault() = TableDefaults("demo1", Cell("name", "default"))
+        fun tableDefault1() = TableDefaults("demo1", Cell("name", "default"))
+
+        @Bean
+        fun tableDefault3() = TableDefaults("demo3", Cell("id", "3"), Cell("name", "default"))
     }
 }

@@ -48,16 +48,18 @@ internal class TableBasedDataSetBuilder(
         while (tables.next()) {
             val table = tables.table
             val tableName = table.tableMetaData.tableName
-            val columnsFromDataSet = table.tableMetaData.columns.toSet()
-            val columnsFromDefaults = this.extensions.defaults.forTable(tableName).map { Column(it.key, DataType.UNKNOWN) }
-            val columns: Array<Column> = if(columnsFromDataSet.isNotEmpty()) (columnsFromDefaults + columnsFromDataSet).distinctBy { keyOf(it.columnName) }.toTypedArray() else emptyArray()
             val primaryKeys = table.tableMetaData.primaryKeys
 
-            consumer.startTable(DefaultTableMetaData(tableName, columns, primaryKeys))
-
             if (table.rowCount == 0) {
-                consumer.row(arrayOfNulls(columns.size))
+                consumer.startTable(DefaultTableMetaData(tableName, emptyArray(), primaryKeys))
+                consumer.row(emptyArray())
             } else {
+                val columnsFromDataSet = table.tableMetaData.columns.toSet()
+                val columnsFromDefaults = this.extensions.defaults.forTable(tableName).map { Column(it.key, DataType.UNKNOWN) }
+                val columns: Array<Column> = (columnsFromDefaults + columnsFromDataSet).distinctBy { keyOf(it.columnName) }.toTypedArray()
+
+                consumer.startTable(DefaultTableMetaData(tableName, columns, primaryKeys))
+
                 (0 until table.rowCount).forEach { rowIndex ->
                     val cells: Array<out Any?> = columns.map { column ->
                         val rawCellValue: Any? = columnsFromDataSet.find { it.columnName.equals(column.columnName, ignoreCase) }?.let { table.getValue(rowIndex, it.columnName) }
@@ -91,29 +93,33 @@ internal class TableBasedDataSetBuilder(
         tables.groupBy { keyOf(it.name) }.mapValues { (_, tables) ->
             tables.flatMap { it.rows }
         }.forEach { (tableName, rows) ->
-            val defaults: Set<Cell> = this.extensions.defaults.forTable(tableName)
-            val columnsFromDataSet = rows.flatMap { it.cells }.map { Column(it.key, DataType.UNKNOWN) }
-            val columnsFromDefaults = this.extensions.defaults.forTable(tableName).map { Column(it.key, DataType.UNKNOWN) }
-            val columns: Array<Column> = if(columnsFromDataSet.isNotEmpty()) (columnsFromDefaults + columnsFromDataSet).distinctBy { keyOf(it.columnName) }.toTypedArray() else emptyArray()
+            if (rows.isEmpty()) {
+                consumer.startTable(DefaultTableMetaData(tableName, emptyArray()))
+                consumer.row(emptyArray())
+            } else {
+                val defaults: Set<Cell> = this.extensions.defaults.forTable(tableName)
+                val columnsFromDataSet = rows.flatMap { it.cells }.map { Column(it.key, DataType.UNKNOWN) }
+                val columnsFromDefaults = this.extensions.defaults.forTable(tableName).map { Column(it.key, DataType.UNKNOWN) }
+                val columns: Array<Column> = (columnsFromDefaults + columnsFromDataSet).distinctBy { keyOf(it.columnName) }.toTypedArray()
 
-            consumer.startTable(DefaultTableMetaData(tableName, columns))
+                consumer.startTable(DefaultTableMetaData(tableName, columns))
 
-            if (rows.isEmpty()) consumer.row(arrayOfNulls(columns.size))
-            else rows.forEach { row ->
-                val cells: Array<out Any?> = columns
-                    .map { column: Column ->
-                        val rawCellValue: Any? = row.cells.find { it.key.equals(column.columnName, ignoreCase) }?.value
-                        val fallback = if(rawCellValue == null) defaults.find { it.key.equals(column.columnName, ignoreCase) }?.value else null
-                        // Process all extensions and fallback to a default value if the cell is not set
-                        extensions
-                            .applyToCell(tableName, Cell(column.columnName, rawCellValue), overrides)
-                            .mapValue { value ->
-                                value ?: fallback
-                            }
-                    }
-                    .map { it.value }
-                    .toTypedArray()
-                consumer.row(cells)
+                rows.forEach { row ->
+                    val cells: Array<out Any?> = columns
+                        .map { column: Column ->
+                            val rawCellValue: Any? = row.cells.find { it.key.equals(column.columnName, ignoreCase) }?.value
+                            val fallback = if(rawCellValue == null) defaults.find { it.key.equals(column.columnName, ignoreCase) }?.value else null
+                            // Process all extensions and fallback to a default value if the cell is not set
+                            extensions
+                                .applyToCell(tableName, Cell(column.columnName, rawCellValue), overrides)
+                                .mapValue { value ->
+                                    value ?: fallback
+                                }
+                        }
+                        .map { it.value }
+                        .toTypedArray()
+                    consumer.row(cells)
+                }
             }
 
             consumer.endTable()
