@@ -44,7 +44,9 @@ if that fails, go to [keyserver site](https://keyserver.ubuntu.com) and upload m
 
 ### 4) Set up the `GPG_SIGNING_KEY` Environment variable
 
-`gpg --armor --export-secret-keys your@email.com | awk 'NR == 1 { print "GPG_SIGNING_KEY=" } 1' ORS='\\n' | pbcopy`
+The below copies the private key to your clipboard
+
+`gpg --armor --export-secret-keys your@email.com | pbcopy`
 
 ## Publishing
 
