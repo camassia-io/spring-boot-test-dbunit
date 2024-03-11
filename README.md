@@ -2,7 +2,8 @@
 
 [![Build](https://github.com/camassia-io/spring-boot-test-dbunit/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/camassia-io/spring-boot-test-dbunit/actions/workflows/build.yml)
 
-[![Publish](https://github.com/camassia-io/spring-boot-test-dbunit/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/camassia-io/spring-boot-test-dbunit/actions/workflows/release.yml)
+![Latest Version](https://img.shields.io/github/v/release/camassia-io/spring-boot-test-dbunit)
+
 
 An Open Source Spring Boot DB Unit Integration, based on the popular but no longer maintained [Spring Test Db Unit](https://springtestdbunit.github.io/spring-test-dbunit)
 
