@@ -1,15 +1,16 @@
 plugins {
     kotlin("jvm") version "1.6.21" apply false
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0-rc-2"
     id("maven-publish")
 }
+
+group = "io.camassia"
+version = System.getenv("GITHUB_VERSION")
 
 subprojects {
     apply {
         plugin("org.jetbrains.kotlin.jvm")
-        plugin("maven-publish")
     }
-
-    group = "io.camassia"
 
     repositories {
         mavenCentral()
@@ -27,16 +28,23 @@ subprojects {
             }
         }
     }
+}
 
-    publishing {
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/camassia-io/spring-boot-test-dbunit")
-                credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
-                }
+nexusPublishing {
+    repositories {
+        sonatype {
+            //nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            //nexusUrl.set(uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/"))
+            //snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            //snapshotRepositoryUrl.set(uri("https://oss.sonatype.org/content/repositories/snapshots/"))
+            val ossrhUsername = providers.environmentVariable("OSSRH_USERNAME")
+            val ossrhPassword = providers.environmentVariable("OSSRH_PASSWORD")
+            if (ossrhUsername.isPresent && ossrhPassword.isPresent) {
+                project.logger.info("OSSRH credentials found")
+                username.set(ossrhUsername.get())
+                password.set(ossrhPassword.get())
+            } else {
+                project.logger.warn("OSSRH credentials not found.These are required to publish to Sonatype.")
             }
         }
     }
@@ -44,6 +52,6 @@ subprojects {
 
 tasks {
     wrapper {
-        gradleVersion = "7.4.2"
+        gradleVersion = "8.6"
     }
 }

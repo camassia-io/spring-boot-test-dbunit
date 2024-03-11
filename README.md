@@ -14,45 +14,13 @@ This library is written in Kotlin, but can be easily integrated into a Java proj
 
 ## Getting Started
 
-For some demo examples see the spring-boot-test-dbunit-demo project
-
-### Register GH Packages as a Source Repository
-
-This project is published to GitHub Packages. Maven Central releases are coming soon...
-
-#### Gradle
-
-```
-repositories {
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/camassia-io/*")
-        // Note specifying Credentials is a short term fix until https://github.community/t/download-from-github-package-registry-without-authentication/14407/93 is fixed by GitHub.
-        credentials {
-            username = "public"
-            password = "\u0067hp_MbWuHdR1tjyN9Zk7v1PMIDh2rEm7tj0aBtZ0"
-        }
-    }
-}
-```
-
-#### Maven
-
-```
-<repositories>
-    <repository>
-        <id>GitHubPackages</id>
-        <name>GitHubPackages</name>
-        <url>https://public:&#103;hp_MbWuHdR1tjyN9Zk7v1PMIDh2rEm7tj0aBtZ0@maven.pkg.github.com/camassia-io/*</url>
-    </repository>
-</repositories>
-```
+For demo examples see the spring-boot-test-dbunit-demo project
 
 ### Import the Dependency
 
 #### Gradle 
 
-`io.camassia:spring-boot-test-dbunit:{{latest version}}`
+`implementation("io.camassia:spring-boot-test-dbunit:{{latest version}}")`
 
 #### Maven
 

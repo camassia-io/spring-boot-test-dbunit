@@ -1,3 +1,9 @@
+# Secrets Required
+#  GPG_SIGNING_KEY
+#  GPG_SIGNING_PASSPHRASE
+#  OSSRH_USERNAME
+#  OSSRH_PASSWORD
+
 name: Publish
 on:
   release:
@@ -9,7 +15,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
-          java-version: 13
+          java-version: 17
+
       - name: Get the version
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
@@ -18,5 +25,9 @@ jobs:
       - name: Publish Packages
         run: ./gradlew -xjar publish
         env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_VERSION: ${{ steps.get_version.outputs.VERSION }}
