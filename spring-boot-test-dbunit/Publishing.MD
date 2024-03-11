@@ -1,13 +1,19 @@
 # Publishing
 
+This project is published to Sonatype Nexus
+
+To Create a new release, go to [Releases](https://github.com/camassia-io/spring-boot-test-dbunit/releases) & Draft a new release. 
+This will trigger the [release workflow](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/.github/workflows/release.yml) which will build the project, sign the artefacts & publish to [Sonatype Nexus](https://oss.sonatype.org/#view-repositories;public~browsestorage~io/camassia)
+
 ## Prerequisites
 
 - GPG Installed (e.g. via homebrew or https://gnupg.org/download/index.html#sec-1-2)
 - Environment Variables:
-- - `GPG_SIGNING_KEY`: See Signing Step 4
-- - `GPG_SIGNING_PASSPHRASE`: See Signing Step 1
-- - `OSSRH_USERNAME`: Sonatype Nexus Username
-- - `OSSRH_PASSWORD`: Sonatype Nexus Password
+  - `GPG_SIGNING_KEY`: See Signing Step 4
+  - `GPG_SIGNING_PASSPHRASE`: See Signing Step 1
+  - `OSSRH_USERNAME`: Sonatype Nexus Username
+  - `OSSRH_PASSWORD`: Sonatype Nexus Password
+  - `GITHUB_VERSION`: The version number, usually of a Github Release
 
 ## Signing Keys
 
