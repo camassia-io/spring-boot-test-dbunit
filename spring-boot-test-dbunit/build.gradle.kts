@@ -52,16 +52,16 @@ tasks {
 }
 
 publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/camassia-io/spring-boot-test-dbunit")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
+//    repositories {
+//        maven {
+//            name = "GitHubPackages"
+//            url = uri("https://maven.pkg.github.com/camassia-io/spring-boot-test-dbunit")
+//            credentials {
+//                username = System.getenv("GITHUB_ACTOR")
+//                password = System.getenv("GITHUB_TOKEN")
+//            }
+//        }
+//    }
 
     publications {
         create<MavenPublication>("maven") {
@@ -82,22 +82,23 @@ publishing {
                         name.set("Apache-2.0")
                         url.set("https://opensource.org/licenses/Apache-2.0")
                     }
-                    developers {
-                        developer {
-                            id.set("ed0906")
-                            name.set("Ed Wilson")
-                            organization.set("Camassia")
-                            organizationUrl.set("https://camassia.io")
-                        }
+                }
+                developers {
+                    developer {
+                        id.set("ed0906")
+                        name.set("ed0906")
+                        email.set("ed0906@camassia.io")
+                        organization.set("Camassia")
+                        organizationUrl.set("https://camassia.io")
                     }
-                    scm {
-                        url.set("https://github.com/camassia-io/spring-boot-test-dbunit")
-                        connection.set("scm:git:git://github.com/camassia-io/spring-boot-test-dbunit.git")
-                        developerConnection.set("scm:git:git://github.com/camassia-io/spring-boot-test-dbunit.git")
-                    }
-                    issueManagement {
-                        url.set("https://github.com/camassia-io/spring-boot-test-dbunit/issues")
-                    }
+                }
+                scm {
+                    url.set("https://github.com/camassia-io/spring-boot-test-dbunit")
+                    connection.set("scm:git:git://github.com/camassia-io/spring-boot-test-dbunit.git")
+                    developerConnection.set("scm:git:git://github.com/camassia-io/spring-boot-test-dbunit.git")
+                }
+                issueManagement {
+                    url.set("https://github.com/camassia-io/spring-boot-test-dbunit/issues")
                 }
             }
         }
