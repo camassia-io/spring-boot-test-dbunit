@@ -26,7 +26,9 @@ jobs:
       - name: Get the version
         id: get_version
         run: |
-          echo ::set-output name=VERSION::${{ inputs.version }}${GITHUB_REF/refs\/tags\//}
+          version = ${{ inputs.version }}${GITHUB_REF/refs\/tags\//}
+          echo "Version: $version"
+          echo ::set-output name=VERSION::$version
 
       - name: Assemble Packages
         run: ./gradlew -xtest jar javadocJar kotlinSourcesJar
