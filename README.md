@@ -41,12 +41,36 @@ The following standalone examples use an In Memory H2 Database with Springs `Jdb
 You would likely replace `JdbcTemplate` with your own Repository Class that you want to test.
 
 - [Using DatabaseSetup & DatabaseTeardown Annotations](https://github.com/camassia-io/spring-boot-test-dbunit#using-databasesetup--databaseteardown-annotations)
+  - [With Programmatic DataSets (recommended)](https://github.com/camassia-io/spring-boot-test-dbunit#with-programmatic-datasets)
   - [With DataSet Files](https://github.com/camassia-io/spring-boot-test-dbunit#with-file-based-datasets)
   - [With Templated DataSet Files](https://github.com/camassia-io/spring-boot-test-dbunit#with-templated-file-based-datasets)
-  - [With Programmatic DataSets](https://github.com/camassia-io/spring-boot-test-dbunit#with-programmatic-datasets)
 - [Using DatabaseTester directly](https://github.com/camassia-io/spring-boot-test-dbunit#using-databasetester-instead-of-annotations)
 
 #### Using `DatabaseSetup` / `DatabaseTeardown` annotations
+
+##### With Programmatic DataSets
+
+You can configure the entire DataSet using annotations if you like (rather than files).
+
+This can be combined with TableDefaults to ensure you only have to specify the bare minimum of cells you want to change per test.
+
+```kotlin
+@DatabaseSetup(
+    tables = [
+        Table(
+            "demo",
+            Row(Cell("ID", "123"), Cell("NAME", "Test"))
+        )
+    ]
+)
+```
+
+You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Customization](https://github.com/camassia-io/spring-boot-test-dbunit#customization) for more info.
+
+###### Useful Examples
+
+See:
+- [DemoUsingAnnotationsAndProgrammaticDataSet](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingAnnotationsAndProgrammaticDataSet.kt)
 
 ##### With File Based DataSets
 
@@ -169,30 +193,6 @@ See:
 - [DemoUsingTemplatedAnnotationsAndDefaults](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedAnnotationsAndDefaults.kt)
 - [DemoUsingTemplatedDatabaseTester](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedDatabaseTester.kt)
 - [DemoUsingTemplatedDatabaseTesterAndDefaults](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingTemplatedDatabaseTesterAndDefaults.kt)
-
-##### With Programmatic DataSets
-
-You can configure the entire DataSet using annotations if you like (rather than files).
-
-This can be combined with TableDefaults to ensure you only have to specify the bare minimum of cells you want to change per test.
-
-```kotlin
-@DatabaseSetup(
-    tables = [
-        Table(
-            "demo",
-            Row(Cell("ID", "123"), Cell("NAME", "Test"))
-        )
-    ]
-)
-```
-
-You can also set up Global Defaults so that you do not have to specify a value for each column of each table. See [Customization](https://github.com/camassia-io/spring-boot-test-dbunit#customization) for more info.
-
-###### Useful Examples
-
-See:
-- [DemoUsingAnnotationsAndProgrammaticDataSet](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/spring-boot-test-dbunit-demo/src/test/kotlin/io/camassia/spring/dbunit/DemoUsingAnnotationsAndProgrammaticDataSet.kt)
 
 ##### With String Based DataSets
 
