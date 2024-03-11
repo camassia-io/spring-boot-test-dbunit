@@ -25,9 +25,20 @@ jobs:
 
       - name: Get the version
         id: get_version
+        shell: bash
         run: |
-          version = ${{ inputs.version }}${GITHUB_REF/refs\/tags\//}
-          echo "Version: $version"
+          is_release=${{ github.event_name == 'release' }}
+          is_manual=${{ github.event_name == 'workflow_dispatch' }}
+          if [ "$is_release" = "true" ]; then
+            version=${GITHUB_REF/refs\/tags\//}
+            echo "Using Release Version: $version"
+          elif [ "$is_manual" = "true" ]; then
+            version=${{ inputs.version }}
+            echo "Using Input Version: $version"
+          else
+            echo "Cannot deduce Version Number from ${{ github.event_name }}"
+            exit 1
+          fi
           echo "VERSION=$version" >> $GITHUB_OUTPUT
 
       - name: Assemble Packages
