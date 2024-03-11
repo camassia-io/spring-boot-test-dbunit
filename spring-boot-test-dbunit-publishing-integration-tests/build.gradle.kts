@@ -10,12 +10,12 @@ java {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
 object Versions {
-    const val VERSION = "4.1.4"
+    const val VERSION = "4.1.4-SNAPSHOT"
 }
 
 dependencies {

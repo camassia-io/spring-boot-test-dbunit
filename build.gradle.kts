@@ -36,12 +36,12 @@ signing {
     val signingPassphrase = providers.environmentVariable("GPG_SIGNING_PASSPHRASE")
 
     if (signingKey.isPresent && signingPassphrase.isPresent) {
-        println("Signing Key + Passphrase found")
+        project.logger.info("Signing Key + Passphrase found")
         useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
         val extension = extensions.getByName("publishing") as PublishingExtension
         sign(extension.publications)
     } else {
-        println("Signing Key or Passphrase missing. Artifacts will not be signed.")
+        project.logger.warn("Signing Key or Passphrase missing. Artifacts will not be signed.")
     }
 }
 
@@ -55,11 +55,11 @@ nexusPublishing {
             val ossrhUsername = providers.environmentVariable("OSSRH_USERNAME")
             val ossrhPassword = providers.environmentVariable("OSSRH_PASSWORD")
             if (ossrhUsername.isPresent && ossrhPassword.isPresent) {
-                println("OSSRH credentials found")
+                project.logger.info("OSSRH credentials found")
                 username.set(ossrhUsername.get())
                 password.set(ossrhPassword.get())
             } else {
-                println("OSSRH credentials not found")
+                project.logger.warn("OSSRH credentials not found.These are required to publish to Sonatype.")
             }
         }
     }
