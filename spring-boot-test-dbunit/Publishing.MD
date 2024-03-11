@@ -45,3 +45,15 @@ if that fails, go to [keyserver site](https://keyserver.ubuntu.com) and upload m
 ### 4) Set up the `GPG_SIGNING_KEY` Environment variable
 
 `gpg --armor --export-secret-keys your@email.com | awk 'NR == 1 { print "GPG_SIGNING_KEY=" } 1' ORS='\\n' | pbcopy`
+
+## Publishing
+
+Ensure the `GITHUB_VERSION` environment variable is set as required
+
+`./gradlew clean publishToSonatype closeAndReleaseStagingRepositories`
+
+### If this fails
+
+Go to https://oss.sonatype.org/#stagingRepositories 
+
+Check if all the validation rules have passed under the "Activity" tab. Fix any failures & try to close via the UI.
