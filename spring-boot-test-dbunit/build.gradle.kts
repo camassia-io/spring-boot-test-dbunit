@@ -41,7 +41,6 @@ tasks {
 }
 
 signing {
-    useGpgCmd()
     val signingKey = providers.environmentVariable("GPG_SIGNING_KEY")
     val signingPassphrase = providers.environmentVariable("GPG_SIGNING_PASSPHRASE")
 
@@ -56,17 +55,6 @@ signing {
 }
 
 publishing {
-//    repositories {
-//        maven {
-//            name = "GitHubPackages"
-//            url = uri("https://maven.pkg.github.com/camassia-io/spring-boot-test-dbunit")
-//            credentials {
-//                username = System.getenv("GITHUB_ACTOR")
-//                password = System.getenv("GITHUB_TOKEN")
-//            }
-//        }
-//    }
-
     publications {
         create<MavenPublication>("maven") {
             groupId = "io.camassia"
@@ -74,7 +62,6 @@ publishing {
             version = System.getenv("GITHUB_VERSION")
             from(components["kotlin"])
             artifact(tasks.kotlinSourcesJar)
-            //artifact(tasks.getByName("sourcesJar"))
             artifact(tasks.getByName("javadocJar"))
 
             pom {
