@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm") version "1.6.21" apply false
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0-rc-2"
     id("maven-publish")
-    signing
 }
 
 group = "io.camassia"
@@ -28,20 +27,6 @@ subprojects {
                 jvmTarget = "13"
             }
         }
-    }
-}
-
-signing {
-    val signingKey = providers.environmentVariable("GPG_SIGNING_KEY")
-    val signingPassphrase = providers.environmentVariable("GPG_SIGNING_PASSPHRASE")
-
-    if (signingKey.isPresent && signingPassphrase.isPresent) {
-        project.logger.info("Signing Key + Passphrase found")
-        useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
-        val extension = extensions.getByName("publishing") as PublishingExtension
-        sign(extension.publications)
-    } else {
-        project.logger.warn("Signing Key or Passphrase missing. Artifacts will not be signed.")
     }
 }
 

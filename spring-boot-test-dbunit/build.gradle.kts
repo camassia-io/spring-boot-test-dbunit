@@ -38,17 +38,21 @@ tasks {
     bootJar {
         enabled = false
     }
+}
 
-//    register<Jar>("sourcesJar") {
-//        archiveClassifier.set("sources")
-//        from(kotlin.sourceSets.main.get().kotlin)
-//    }
-//
-//    register<Jar>("javadocJar") {
-//        group = JavaBasePlugin.DOCUMENTATION_GROUP
-//        description = "Assembles Javadoc JAR"
-//        archiveClassifier.set("javadoc")
-//    }
+signing {
+    useGpgCmd()
+    val signingKey = providers.environmentVariable("GPG_SIGNING_KEY")
+    val signingPassphrase = providers.environmentVariable("GPG_SIGNING_PASSPHRASE")
+
+    if (signingKey.isPresent && signingPassphrase.isPresent) {
+        project.logger.info("Signing Key + Passphrase found")
+        project.logger.info(signingKey.get())
+        useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
+        sign(publishing.publications)
+    } else {
+        project.logger.warn("Signing Key or Passphrase missing. Artifacts will not be signed.")
+    }
 }
 
 publishing {
