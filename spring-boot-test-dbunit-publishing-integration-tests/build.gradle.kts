@@ -15,7 +15,7 @@ repositories {
 }
 
 object Versions {
-    const val VERSION = "4.1.4-SNAPSHOT"
+    const val VERSION = "4.2.0"
 }
 
 dependencies {
