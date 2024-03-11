@@ -33,10 +33,6 @@ subprojects {
 nexusPublishing {
     repositories {
         sonatype {
-            //nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            //nexusUrl.set(uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/"))
-            //snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            //snapshotRepositoryUrl.set(uri("https://oss.sonatype.org/content/repositories/snapshots/"))
             val ossrhUsername = providers.environmentVariable("OSSRH_USERNAME")
             val ossrhPassword = providers.environmentVariable("OSSRH_PASSWORD")
             if (ossrhUsername.isPresent && ossrhPassword.isPresent) {
@@ -44,7 +40,7 @@ nexusPublishing {
                 username.set(ossrhUsername.get())
                 password.set(ossrhPassword.get())
             } else {
-                project.logger.warn("OSSRH credentials not found.These are required to publish to Sonatype.")
+                project.logger.warn("OSSRH credentials not found. These are required to publish to Sonatype.")
             }
         }
     }

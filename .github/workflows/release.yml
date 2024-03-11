@@ -41,20 +41,11 @@ jobs:
           fi
           echo "VERSION=$version" >> $GITHUB_OUTPUT
 
-      - name: Assemble Packages
-        run: ./gradlew -xtest jar javadocJar kotlinSourcesJar
-
-      - name: Sign Packages
-        run: ./gradlew -xjar signMavenPublication
-        env:
-          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
-          GPG_SIGNING_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-
       - name: Publish Packages
         run: ./gradlew publishToSonatype closeAndReleaseStagingRepositories
         env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
