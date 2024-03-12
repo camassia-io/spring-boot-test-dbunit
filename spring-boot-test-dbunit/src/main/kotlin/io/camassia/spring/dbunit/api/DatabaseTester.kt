@@ -16,6 +16,8 @@ import org.dbunit.database.IDatabaseConnection
 import org.dbunit.dataset.CachedDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
+import org.dbunit.dataset.NoSuchColumnException
+import org.dbunit.dataset.NoSuchTableException
 import org.dbunit.util.TableFormatter
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
@@ -181,9 +183,9 @@ open class DatabaseTester(
 
         // Verify all Overrides have been used
         dataSets.values.map { it.unused() }.forEach {
-            if(it.isNotEmpty()) {
+            if (it.isNotEmpty()) {
                 val message = "There were unused overrides: $it. Could there be a typo?"
-                if(failOnUnusedOverrides) throw DbUnitException("$message \nNote: this error can be suppressed using spring property: spring.dbunit.fail_on_unused_overrides=false")
+                if (failOnUnusedOverrides) throw DbUnitException("$message \nNote: this error can be suppressed using spring property: spring.dbunit.fail_on_unused_overrides=false")
                 else log.warn(message)
             }
         }
@@ -200,12 +202,36 @@ open class DatabaseTester(
             }
             throw DbUnitException(
                 """
-                |Could not load DataSet:
+                |Could not load DataSet: ${throwable.deduceContext() ?: ""}
                 |$builder
                 """.trimMargin().trim(),
                 throwable
             )
         }
+    }
+
+    private fun Throwable.deduceContext(): String? = kotlin.runCatching {
+        when(this) {
+            is NoSuchColumnException -> {
+                val regex = Regex("^(?<table>[^\\.]+)\\.(?<column>\\S+)\\s.*\$")
+                val (table, column) = this.message?.let {
+                    regex
+                        .find(it)
+                }
+                    ?.groups
+                    ?.takeIf { it.size == 3 }
+                    .let {
+                        (it?.get("table")?.value ?: "?") to (it?.get("column")?.value ?: "?")
+                    }
+                val columns = createTable("table").tableMetaData.columns.map { it.columnName }
+                "The column [$column] on table [$table] does not exist. ${if(columns.isEmpty()) "Did you mean one of: [${columns.joinToString()}]" else "There were no columns on table [$table]"}"
+            }
+            is NoSuchTableException -> "The table [${this.message}] does not exist"
+            else -> null
+        }
+    }.getOrElse {
+        log.warn("Attempted to parse caused-by Exception message but failed", it)
+        null
     }
 
     /**

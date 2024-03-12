@@ -507,7 +507,7 @@ class DatabaseTesterTest @Autowired constructor(
         }
 
         @Test
-        fun shouldThrowUsefulExceptionOnFailure() {
+        fun shouldThrowUsefulExceptionOnNoSuchTableException() {
             assertThatThrownBy {
                 dbunit.givenDataSet(
                     Table("other1", Row(Cell("ID", "Value"))),
@@ -518,7 +518,7 @@ class DatabaseTesterTest @Autowired constructor(
                 .isInstanceOf(DbUnitException::class.java)
                 .hasMessage(
                     """
-                    Could not load DataSet:
+                    Could not load DataSet: The table [OTHER2] does not exist
                     
                     ****** table: OTHER1 ** row count: 1 ******
                     ID                  |
@@ -532,6 +532,27 @@ class DatabaseTesterTest @Autowired constructor(
                     """.trimIndent()
                 )
                 .hasCauseInstanceOf(NoSuchTableException::class.java)
+        }
+
+        @Test
+        fun shouldThrowUsefulExceptionOnNoSuchColumnException() {
+            assertThatThrownBy {
+                dbunit.givenDataSet(
+                    Table("demo1", Row(Cell("UNKNOWN_COLUMN", "Value")))
+                )
+            }
+                .isInstanceOf(DbUnitException::class.java)
+                .hasMessage(
+                    """
+                    Could not load DataSet: The column [UNKNOWN_COLUMN] on table [DEMO1] does not exist
+                    
+                    ****** table: DEMO1 ** row count: 1 ******
+                    name                |UNKNOWN_COLUMN      |
+                    ====================|====================|
+                    default             |Value               |
+                    """.trimIndent()
+                )
+                .hasCauseInstanceOf(NoSuchColumnException::class.java)
         }
     }
 
