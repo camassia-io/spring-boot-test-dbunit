@@ -24,7 +24,9 @@ subprojects {
         withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
             kotlinOptions {
                 freeCompilerArgs = listOf("-Xjsr305=strict")
-                jvmTarget = "13"
+
+                // Users of this project need the below Java Version as a minimum
+                jvmTarget = "11"
             }
         }
     }
