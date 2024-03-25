@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.23" apply false
+    kotlin("jvm") version "1.6.21" apply false
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0-rc-2"
     id("maven-publish")
 }
@@ -26,7 +26,7 @@ subprojects {
                 freeCompilerArgs = listOf("-Xjsr305=strict")
 
                 // Users of this project need the below Java Version as a minimum
-                jvmTarget = JavaVersion.VERSION_11.toString()
+                jvmTarget = "11"
             }
         }
     }
