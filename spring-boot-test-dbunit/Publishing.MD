@@ -5,7 +5,15 @@ This project is published to Sonatype Nexus
 To Create a new release, go to [Releases](https://github.com/camassia-io/spring-boot-test-dbunit/releases) & Draft a new release. 
 This will trigger the [release workflow](https://github.com/camassia-io/spring-boot-test-dbunit/blob/main/.github/workflows/release.yml) which will build the project, sign the artefacts & publish to [Sonatype Nexus](https://oss.sonatype.org/#view-repositories;public~browsestorage~io/camassia)
 
-## Prerequisites
+## Publish to Maven Local
+
+This just requires the GITHUB_VERSION
+
+`GITHUB_VERSION=xxx-SNAPSHOT ./gradlew publishToMavenLocal`
+
+## Publish to Nexus / Maven Central
+
+### Prerequisites
 
 - GPG Installed (e.g. via homebrew or https://gnupg.org/download/index.html#sec-1-2)
 - Environment Variables:
@@ -15,12 +23,12 @@ This will trigger the [release workflow](https://github.com/camassia-io/spring-b
   - `OSSRH_PASSWORD`: Sonatype Nexus Password
   - `GITHUB_VERSION`: The version number, usually of a Github Release
 
-## Signing Keys
+### Signing Keys
 
 Maven Central requires all artifacts to be signed using GPG
 See https://central.sonatype.org/publish/requirements/gpg/#generating-a-key-pair for more info
 
-### 1) Create a key pair
+#### 1) Create a key pair
 
 `gpg --gen-key`
 
@@ -28,13 +36,13 @@ Note the above generates a key that lasts for 2 years
 
 Set the following variable `GPG_SIGNING_PASSWORD={password used}`
 
-### 2) Fetch the Public Key ID
+#### 2) Fetch the Public Key ID
 
 `gpg --list-keys`
 
 The key ID is the long uppercase String under `pub`
 
-### 3) Distribute the Public Key to a keyserver
+#### 3) Distribute the Public Key to a keyserver
 
 ##### Via Command Line
 
@@ -48,19 +56,19 @@ if that fails, go to [keyserver site](https://keyserver.ubuntu.com) and upload m
 
 `gpg --armor --output public-key.gpg --export your@email.com | pbcopy`
 
-### 4) Set up the `GPG_SIGNING_KEY` Environment variable
+#### 4) Set up the `GPG_SIGNING_KEY` Environment variable
 
 The below copies the private key to your clipboard
 
 `gpg --armor --export-secret-keys your@email.com | pbcopy`
 
-## Publishing
+### Publishing
 
 Ensure the `GITHUB_VERSION` environment variable is set as required
 
 `./gradlew clean publishToSonatype closeAndReleaseStagingRepositories`
 
-### If this fails
+#### If this fails
 
 Go to https://oss.sonatype.org/#stagingRepositories 
 
