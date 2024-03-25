@@ -49,4 +49,4 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_VERSION: ${{ steps.get_version.outputs.VERSION }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}

@@ -54,7 +54,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "io.camassia"
             artifactId = "spring-boot-test-dbunit"
-            version = System.getenv("GITHUB_VERSION")
+            version = System.getenv("VERSION")
             from(components["kotlin"])
             artifact(tasks.kotlinSourcesJar)
             artifact(tasks.getByName("javadocJar"))

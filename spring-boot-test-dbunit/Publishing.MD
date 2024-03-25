@@ -7,9 +7,9 @@ This will trigger the [release workflow](https://github.com/camassia-io/spring-b
 
 ## Publish to Maven Local
 
-This just requires the GITHUB_VERSION
+This just requires the VERSION
 
-`GITHUB_VERSION=xxx-SNAPSHOT ./gradlew publishToMavenLocal`
+`VERSION=xxx-SNAPSHOT ./gradlew publishToMavenLocal`
 
 ## Publish to Nexus / Maven Central
 
@@ -21,7 +21,7 @@ This just requires the GITHUB_VERSION
   - `GPG_SIGNING_PASSPHRASE`: See Signing Step 1
   - `OSSRH_USERNAME`: Sonatype Nexus Username
   - `OSSRH_PASSWORD`: Sonatype Nexus Password
-  - `GITHUB_VERSION`: The version number, usually of a Github Release
+  - `VERSION`: The version number, usually of a Github Release
 
 ### Signing Keys
 
@@ -64,7 +64,7 @@ The below copies the private key to your clipboard
 
 ### Publishing
 
-Ensure the `GITHUB_VERSION` environment variable is set as required
+Ensure the `VERSION` environment variable is set as required
 
 `./gradlew clean publishToSonatype closeAndReleaseStagingRepositories`
 

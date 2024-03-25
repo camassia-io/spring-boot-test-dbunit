@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "io.camassia"
-version = System.getenv("GITHUB_VERSION")
+version = System.getenv("VERSION")
 
 subprojects {
     apply {
