@@ -12,8 +12,10 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    // Max version Code can use features of
+    sourceCompatibility = JavaVersion.VERSION_11
+    // Library consumers must use this version as a minimum
+    targetCompatibility = JavaVersion.VERSION_11
     withSourcesJar()
     withJavadocJar()
 }

@@ -4,11 +4,6 @@ plugins {
     kotlin("plugin.spring") version "1.6.21"
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
 repositories {
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
@@ -38,5 +33,14 @@ dependencies {
 tasks {
     bootJar {
         enabled = false
+    }
+
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            freeCompilerArgs = listOf("-Xjsr305=strict")
+
+            // Users of this project need the below Java Version as a minimum
+            jvmTarget = JavaVersion.VERSION_17.toString()
+        }
     }
 }
