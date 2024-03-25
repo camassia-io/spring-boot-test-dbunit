@@ -544,7 +544,7 @@ class DatabaseTesterTest @Autowired constructor(
                 .isInstanceOf(DbUnitException::class.java)
                 .hasMessage(
                     """
-                    Could not load DataSet: The column [UNKNOWN_COLUMN] on table [DEMO1] does not exist
+                    Could not load DataSet: The column [UNKNOWN_COLUMN] on table [DEMO1] does not exist. 
                     
                     ****** table: DEMO1 ** row count: 1 ******
                     name                |UNKNOWN_COLUMN      |

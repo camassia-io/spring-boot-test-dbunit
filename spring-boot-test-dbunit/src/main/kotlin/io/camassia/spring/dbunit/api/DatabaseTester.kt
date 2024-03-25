@@ -223,8 +223,8 @@ open class DatabaseTester(
                     .let {
                         (it?.get("table")?.value ?: "?") to (it?.get("column")?.value ?: "?")
                     }
-                val columns = createTable("table").tableMetaData.columns.map { it.columnName }
-                "The column [$column] on table [$table] does not exist. ${if(columns.isEmpty()) "Did you mean one of: [${columns.joinToString()}]" else "There were no columns on table [$table]"}"
+                val columns = createTable(table).tableMetaData.columns.map { it.columnName }
+                "The column [$column] on table [$table] does not exist. ${if(columns.isEmpty()) "Did you mean one of: [${columns.joinToString()}]" else ""}"
             }
             is NoSuchTableException -> "The table [${this.message}] does not exist"
             else -> null
