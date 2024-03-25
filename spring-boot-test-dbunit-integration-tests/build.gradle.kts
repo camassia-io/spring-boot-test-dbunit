@@ -4,9 +4,6 @@ plugins {
     kotlin("plugin.spring") version "1.6.21"
 }
 
-java {
-}
-
 dependencies {
     implementation(project(":spring-boot-test-dbunit"))
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
