@@ -6,11 +6,12 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven("https://oss.sonatype.org/content/repositories/public/")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
 object Versions {
-    const val VERSION = "4.2.0"
+    val VERSION = providers.environmentVariable("VERSION").orElse("4.3.1-SNAPSHOT")
 }
 
 dependencies {
@@ -33,14 +34,5 @@ dependencies {
 tasks {
     bootJar {
         enabled = false
-    }
-
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions {
-            freeCompilerArgs = listOf("-Xjsr305=strict")
-
-            // Users of this project need the below Java Version as a minimum
-            jvmTarget = JavaVersion.VERSION_17.toString()
-        }
     }
 }

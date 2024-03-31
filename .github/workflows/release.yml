@@ -41,6 +41,20 @@ jobs:
           fi
           echo "VERSION=$version" >> $GITHUB_OUTPUT
 
+      - name: Publish Snapshot Packages
+        if: !endsWith(steps.get_version.outputs.VERSION, '-SNAPSHOT')
+        run: ./gradlew publishToSonatype closeAndReleaseStagingRepositories
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
+
+      - name: Smoke Test Snapshot
+        if: !endsWith(steps.get_version.outputs.VERSION, '-SNAPSHOT')
+        run: ./gradlew :spring-boot-test-dbunit-publishing-integration-tests:test
+        env:
+          VERSION: ${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
+
       - name: Publish Packages
         run: ./gradlew publishToSonatype closeAndReleaseStagingRepositories
         env:
@@ -48,5 +62,9 @@ jobs:
           GPG_SIGNING_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+
+      - name: Smoke Test
+        run: ./gradlew :spring-boot-test-dbunit-publishing-integration-tests:test
+        env:
           VERSION: ${{ steps.get_version.outputs.VERSION }}
