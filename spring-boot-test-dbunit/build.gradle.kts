@@ -17,16 +17,16 @@ java {
 }
 
 dependencies {
-    api("org.dbunit:dbunit:2.7.3")
+    api("org.dbunit:dbunit:2.8.0")
     api("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "com.vaadin.external.google", module = "android-json")
     }
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.6.2")
-    testImplementation("org.assertj:assertj-core:3.22.0")
-    testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testImplementation("org.assertj:assertj-core:3.26.3")
+    testImplementation("io.mockk:mockk:1.13.13")
 }
 
 tasks {
