@@ -37,10 +37,9 @@ jobs:
           rm -f ~/.gradle/caches/modules-2/gc.properties
 
       - name: Upload Test Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Test Reports
-          retention-days: 1
-          path: |
-            */build/reports/tests/test/**/*
+          retention-days: 3
+          path: '*/build/reports/tests/test/**/*'
